@@ -138,7 +138,17 @@ function initializeBot() {
     // Function to verify if the in-game account exists using BattleMetrics API
     async function verifyInGameAccount(accountName) {
         try {
-            const response = await axios.get('https://api.battlemetrics.com/servers/30653650/players');
+            const response = await axios.get('https://api.battlemetrics.com/players', {
+                params: {
+                    filter: {
+                        search: accountName,
+                        server: '30653650'
+                    }
+                },
+                headers: {
+                    'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
+                }
+            });
             const players = response.data.data.map(player => player.attributes.name);
             return players.includes(accountName);
         } catch (error) {
@@ -293,7 +303,16 @@ function initializeBot() {
     // Function to test the API connection to BattleMetrics
     async function testBattleMetricsAPI() {
         try {
-            const response = await axios.get('https://api.battlemetrics.com/servers/30653650/players');
+            const response = await axios.get('https://api.battlemetrics.com/players', {
+                params: {
+                    filter: {
+                        server: '30653650'
+                    }
+                },
+                headers: {
+                    'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
+                }
+            });
             console.log('BattleMetrics API connection successful. Players:', response.data.data.map(player => player.attributes.name));
         } catch (error) {
             console.error('Error connecting to BattleMetrics API:', error);
@@ -311,6 +330,23 @@ function initializeBot() {
                 console.log('Server console connection closed. Reconnecting...');
                 setTimeout(readServerConsole, 5000); // Reconnect after 5 seconds
             });
+        }
+    }
+
+    // Function to read the death log file and post messages to the death log channel
+    async function readDeathLog() {
+        try {
+            const data = await fs.readFile(deathLogFilePath, 'utf8');
+            const deathMessages = data.trim().split('\n').slice(lastReadPosition);
+            deathMessages.forEach(message => {
+                const channel = client.channels.cache.get(deathLogChannelId);
+                if (channel) {
+                    channel.send(message).catch(console.error);
+                }
+            });
+            lastReadPosition += deathMessages.length;
+        } catch (err) {
+            console.error('Error reading death log file:', err);
         }
     }
 
@@ -740,28 +776,20 @@ function initializeBot() {
     });
 
     // Function to read the death log file and post messages to the death log channel
-    function readDeathLog() {
-        fs.open(deathLogFilePath, 'r').then(fd => {
-            return fs.stat(deathLogFilePath).then(stats => {
-                if (stats.size > lastReadPosition) {
-                    const buffer = Buffer.alloc(stats.size - lastReadPosition);
-                    return fs.read(fd, buffer, 0, buffer.length, lastReadPosition).then(({ bytesRead }) => {
-                        const deathMessages = buffer.toString('utf8').trim().split('\n');
-                        deathMessages.forEach(message => {
-                            const channel = client.channels.cache.get(deathLogChannelId);
-                            if (channel) {
-                                channel.send(message).catch(console.error);
-                            }
-                        });
-                        lastReadPosition += bytesRead;
-                    }).finally(() => fs.close(fd));
-                } else {
-                    return fs.close(fd);
+    async function readDeathLog() {
+        try {
+            const data = await fs.readFile(deathLogFilePath, 'utf8');
+            const deathMessages = data.trim().split('\n').slice(lastReadPosition);
+            deathMessages.forEach(message => {
+                const channel = client.channels.cache.get(deathLogChannelId);
+                if (channel) {
+                    channel.send(message).catch(console.error);
                 }
             });
-        }).catch(err => {
+            lastReadPosition += deathMessages.length;
+        } catch (err) {
             console.error('Error reading death log file:', err);
-        });
+        }
     }
 
     // Set an interval to read the death log file periodically
