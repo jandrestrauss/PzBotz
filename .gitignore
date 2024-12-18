@@ -1,9 +1,3 @@
-# Sensitive data
 bot_token.txt
 .env
-.env.*
-config.json
-credentials/
-
-# Dependencies
 node_modules/
