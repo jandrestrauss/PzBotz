@@ -1,0 +1,7 @@
+{
+    "wheelSpinChannelId": "your-wheel-spin-channel-id",
+    "deathLogChannelId": "your-death-log-channel-id",
+    "deathLogFilePath": "death_log.txt",
+    "pointsFilePath": "user_points.json",
+    "ticketsFilePath": "user_tickets.json"
+}

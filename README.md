@@ -18,7 +18,7 @@ This bot is written for people to easily manage their Project Zomboid server usi
 * [Localization](#localization)
 
 # Features
-- Automated server restart schedule with ingame and discord warning. (Warnings are announced when 1 hour, 30 min, 15 min, 5 min and 1 min left until server restart. Restart interval can be configured with bot commands.)
+- Automated server restart schedule with ingame and discord warning. (Warnings are announced when  hour, 30 min, 15 min, 5 min and 1 min left until server restart. Restart interval can be configured with bot commands.)
 ![Automated Server Restart Example](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_1.png)
 - Automated server restart when a mod (workshop item) update has been detected.
 ![Automated Workshop Item Update Server Restart](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_4.png)
@@ -35,6 +35,37 @@ This bot is written for people to easily manage their Project Zomboid server usi
 ![Backup Command Example 2](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_8.png)
 - Localization system! You can check available localizations using `!localization` command.  See the [Localization](#localization) section about how to translate the bot.
 <i>**Note:** It is not possible to translate commands and their descriptions at the moment. It might change in future, though.</i>
+- Simple shop system to buy items using `!shop` and `!buy` commands.
+- Wheel spins event to assign and give in-game rewards using tickets.
+- Death message report to post funny lines and death messages in a designated channel.
+
+## Project Scope
+
+### Objectives
+- Provide an easy-to-use interface for managing Project Zomboid servers via Discord.
+- Automate server management tasks such as restarts, updates, and backups.
+- Offer a set of commands for server administrators to control the server and manage players.
+- Provide a simple shop system for users to buy items.
+- Implement a wheel spins event for in-game rewards using tickets.
+- Report death messages with funny lines in a designated channel.
+
+### Features
+- Automated server restart schedule with in-game and Discord warnings.
+- Automated server restart when a mod update is detected.
+- Execute server commands through Discord bot commands.
+- Perk parser with a caching system to aid players.
+- Auto server start if the server quits unexpectedly.
+- Commands to check RAM and CPU usage, and to backup the server.
+- Localization support for different languages.
+- Simple shop system to buy items using `!shop` and `!buy` commands.
+- Wheel spins event to assign and give in-game rewards using tickets.
+- Death message report to post funny lines and death messages in a designated channel.
+
+### Limitations
+- The bot does not support multiple Discord servers.
+- Only works on Windows operating systems.
+- Requires .NET Framework 4.7.2 to be installed on the machine.
+- **Note:** The bot currently only supports English.
 
 # Installation
 #### Creating the Discord Bot
@@ -116,6 +147,8 @@ Bot Commands:
 - `!toggle_server_auto_start` Enables/Disables the server auto start feature if server is not running. (!toggle_server_auto_start)<br>
 - `!backup_server` Creates a backup of the server. Backup files can be found in "server_backup" folder in the directory where bot has been launched. (!backup_server)<br>
 - `!localization` Get/change current localization. (!localization [*(optional)* new localization name])<br>
+- `!shop` Displays the list of items available for purchase. (!shop)<br>
+- `!buy` Buys an item from the shop. (!buy [item name])<br>
   
 Server Commands:
 - `!server_cmd` Allows you to send inputs to the server console. (!server_cmd [text])<br>
@@ -200,3 +233,45 @@ hours ago {hours} -> hours ago 10
 ```
 
 After you have completed translating all words/sentences, please create an [issue](https://github.com/egebilecen/PZServerDiscordBot/issues/new/choose) by selecting the **Localization Submission** template with the title of `Localization of <language here>` and attaching the translated `.json` file in a **zip archive**. I will add it to available localizations. Also, when a new version of the bot released, there might be new added text so it is good to keep an eye on updates. If your current localization is missing the new added text, bot will use the default localization for these.
+
+# PZBotV
+
+## Project Description
+PZBotV is a bot designed to [briefly describe the main functionality of your bot].
+
+## Features
+- Feature 1: [Description of feature 1]
+- Feature 2: [Description of feature 2]
+- Feature 3: [Description of feature 3]
+
+## Installation
+To install the project, follow these steps:
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/PZBotV.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd PZBotV
+    ```
+3. Install the dependencies:
+    ```bash
+    npm install
+    ```
+
+## Usage
+To run the bot, use the following command:
+```bash
+npm start
+```
+
+## Contributing
+If you would like to contribute to this project, please follow these steps:
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
