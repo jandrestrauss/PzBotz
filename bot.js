@@ -3,7 +3,6 @@ const Discord = require('discord.js');
 const fs = require('fs').promises;
 const path = require('path');
 const net = require('net');
-const sqlite3 = require('sqlite3').verbose();
 const axios = require('axios');
 const client = new Discord.Client();
 const prefix = '!';
@@ -27,7 +26,6 @@ function initializeBot() {
     const ticketsFilePath = path.join(__dirname, config?.ticketsFilePath);
     const linkedAccountsFilePath = path.join(__dirname, 'linked_accounts.json');
     const modDataFilePath = path.join(__dirname, 'mod_data.bin');
-    const dbPath = path.join(__dirname, 'path/to/servertest.db');
 
     const shopItems = {
         'wheelspin_ticket': { name: 'Wheel Spin Ticket', price: 500 }

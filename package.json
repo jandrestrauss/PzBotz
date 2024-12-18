@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "discord.js": "^12.5.3",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "axios": "^1.6.5"
   },
   "author": "yourusername",
   "license": "MIT",
