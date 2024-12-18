@@ -2,11 +2,17 @@
 bot_token.txt
 .env
 .env.*
+.env.test
 config.json
+config.test.json
+credentials/
 
 # Generated files
 logs/
 data/
+*.exe
 
 # Dependencies
 node_modules/
+dist/
+build/
