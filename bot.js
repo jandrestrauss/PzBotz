@@ -4,6 +4,8 @@ const fs = require('fs').promises;
 const path = require('path');
 const { Rcon } = require('rcon-client');
 const axios = require('axios');
+const psList = require('ps-list');
+const { spawn } = require('child_process');
 const client = new Discord.Client();
 const prefix = '!';
 
@@ -350,6 +352,34 @@ function initializeBot() {
         }
     }
 
+    // Function to check if the server process is already running
+    async function isServerRunning() {
+        const processes = await psList();
+        return processes.some(process => process.name.includes('serverExecutableName')); // Replace 'serverExecutableName' with the actual server executable name
+    }
+
+    // Function to start the server if it's not already running
+    async function startServer() {
+        if (await isServerRunning()) {
+            console.log('Server is already running.');
+            return;
+        }
+
+        const serverProcess = spawn('path/to/serverExecutable', ['--option1', '--option2']); // Replace with actual server executable and options
+
+        serverProcess.stdout.on('data', (data) => {
+            console.log(`Server: ${data}`);
+        });
+
+        serverProcess.stderr.on('data', (data) => {
+            console.error(`Server Error: ${data}`);
+        });
+
+        serverProcess.on('close', (code) => {
+            console.log(`Server process exited with code ${code}`);
+        });
+    }
+
     // Set an interval to refresh the bot's status every minute
     setInterval(updateBotStatus, 60000);
 
@@ -361,6 +391,9 @@ function initializeBot() {
 
     // Test the server connection on startup
     testServerConnection();
+
+    // Start the server if it's not already running
+    startServer();
 
     client.on('message', async message => {
         if (!message.content.startsWith(prefix) || message.author.bot) return;
@@ -864,12 +897,97 @@ function initializeBot() {
 
     // Function to get player statistics
     async function getPlayerStatistics() {
-        // Implement your logic to get player statistics
-        // For demonstration purposes, we'll return dummy data
-        return {
-            totalPlaytime: 1000,
-            totalKills: 500
-        };
+        try {
+            const response = await axios.get('https://api.battlemetrics.com/players', {
+                params: {
+                    filter: {
+                        server: '30653650'
+                    }
+                },
+                headers: {
+                    'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
+                }
+            });
+            const players = response.data.data;
+            let totalPlaytime = 0;
+            let totalKills = 0;
+
+            players.forEach(player => {
+                totalPlaytime += player.attributes.timePlayed;
+                totalKills += player.attributes.kills;
+            });
+
+            return {
+                totalPlaytime: (totalPlaytime / 3600).toFixed(2), // Convert seconds to hours
+                totalKills
+            };
+        } catch (error) {
+            console.error('Error fetching player statistics:', error);
+            return {
+                totalPlaytime: 0,
+                totalKills: 0
+            };
+        }
+    }
+
+    // Function to backup the server
+    async function backupServer() {
+        try {
+            const backupDir = path.join(__dirname, 'backups');
+            await fs.mkdir(backupDir, { recursive: true });
+            const backupFilePath = path.join(backupDir, `backup_${Date.now()}.zip`);
+
+            // Implement your logic to create a backup of the server
+            // For demonstration purposes, we'll create an empty file
+            await fs.writeFile(backupFilePath, '');
+
+            console.log(`Server backup created at ${backupFilePath}`);
+        } catch (error) {
+            console.error('Error creating server backup:', error);
+        }
+    }
+
+    // Function to get server health
+    async function getServerHealth() {
+        try {
+            const cpuUsage = await getCpuUsage();
+            const memoryUsage = await getMemoryUsage();
+            const diskSpace = await getDiskSpace();
+
+            return {
+                status: 'healthy',
+                cpuUsage,
+                memoryUsage,
+                diskSpace
+            };
+        } catch (error) {
+            console.error('Error getting server health:', error);
+            return {
+                status: 'unhealthy',
+                cpuUsage: 0,
+                memoryUsage: 0,
+                diskSpace: 0
+            };
+        }
+    }
+
+    // Helper functions to get CPU, memory, and disk space usage
+    async function getCpuUsage() {
+        // Implement your logic to get CPU usage
+        // For demonstration purposes, we'll return a dummy value
+        return 30;
+    }
+
+    async function getMemoryUsage() {
+        // Implement your logic to get memory usage
+        // For demonstration purposes, we'll return a dummy value
+        return 40;
+    }
+
+    async function getDiskSpace() {
+        // Implement your logic to get disk space usage
+        // For demonstration purposes, we'll return a dummy value
+        return 70;
     }
 
     // Function to check server health
@@ -889,19 +1007,6 @@ function initializeBot() {
 
             channel.send(embed).catch(console.error);
         }
-    }
-
-    // Function to get server health
-    async function getServerHealth() {
-        // Implement your logic to get server health
-    // Schedule regular backups
-        // For demonstration purposes, we'll return dummy data
-        return {
-            status: 'healthy',
-            cpuUsage: 30,
-            memoryUsage: 40,
-            diskSpace: 70
-        };
     }
 
     // Set intervals for automated tasks
