@@ -1,7 +1,12 @@
 {
-    "wheelSpinChannelId": "your-wheel-spin-channel-id",
-    "deathLogChannelId": "your-death-log-channel-id",
-    "deathLogFilePath": "death_log.txt",
-    "pointsFilePath": "user_points.json",
-    "ticketsFilePath": "user_tickets.json"
+  "wheelSpinChannelId": "your_channel_id",
+  "deathLogChannelId": "your_channel_id",
+  "deathLogFilePath": "logs/death_log.txt",
+  "pointsFilePath": "data/points.json",
+  "ticketsFilePath": "data/tickets.json",
+  "backupInterval": 1440,
+  "logRetentionPeriod": 7,
+  "modUpdateChannelId": "your_channel_id",
+  "statsChannelId": "your_channel_id",
+  "healthChannelId": "your_channel_id"
 }
