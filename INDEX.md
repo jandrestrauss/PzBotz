@@ -574,3 +574,4 @@
 - [/src/PZServerDiscordBot.csproj](./src/PZServerDiscordBot.csproj)
 - [/src/PZServerDiscordBot.sln](./src/PZServerDiscordBot.sln)
 - [/src/toppng.com-discordbot-bot-discord-402x290.ico](./src/toppng.com-discordbot-bot-discord-402x290.ico)
+- [/server.bat](./server.bat)

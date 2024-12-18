@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { Rcon } = require('rcon-client');
 const axios = require('axios');
-const psList = require('ps-list');
+// const psList = require('ps-list'); // Remove this line
 const { spawn } = require('child_process');
 const client = new Discord.Client();
 const prefix = '!';
@@ -20,7 +20,7 @@ let config;
     }
 })();
 
-function initializeBot() {
+async function initializeBot() {
     const wheelSpinChannelId = config?.wheelSpinChannelId;
     const deathLogChannelId = config?.deathLogChannelId;
     const deathLogFilePath = config?.deathLogFilePath; // Use absolute path directly
@@ -142,10 +142,8 @@ function initializeBot() {
         try {
             const response = await axios.get('https://api.battlemetrics.com/players', {
                 params: {
-                    filter: {
-                        search: accountName,
-                        server: '30653650'
-                    }
+                    'filter[search]': accountName,
+                    'filter[server]': '30653650'
                 },
                 headers: {
                     'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
@@ -307,9 +305,7 @@ function initializeBot() {
         try {
             const response = await axios.get('https://api.battlemetrics.com/players', {
                 params: {
-                    filter: {
-                        server: '30653650'
-                    }
+                    'filter[server]': '30653650'
                 },
                 headers: {
                     'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
@@ -341,9 +337,10 @@ function initializeBot() {
             const data = await fs.readFile(deathLogFilePath, 'utf8');
             const deathMessages = data.trim().split('\n').slice(lastReadPosition);
             deathMessages.forEach(message => {
+                const formattedMessage = formatDeathMessage(message);
                 const channel = client.channels.cache.get(deathLogChannelId);
                 if (channel) {
-                    channel.send(message).catch(console.error);
+                    channel.send(formattedMessage).catch(console.error);
                 }
             });
             lastReadPosition += deathMessages.length;
@@ -352,8 +349,37 @@ function initializeBot() {
         }
     }
 
+    // Function to format death log messages
+    function formatDeathMessage(message) {
+        const lines = message.split('\n');
+        const formattedLines = lines.map(line => line.trim()).filter(line => line.length > 0);
+        const formattedMessage = formattedLines.join('\n');
+        return `\`\`\`\n${formattedMessage}\n\`\`\``;
+    }
+
+    // Function to save the last read position
+    async function saveLastReadPosition() {
+        try {
+            await fs.writeFile(path.join(__dirname, 'last_read_position.txt'), lastReadPosition.toString(), 'utf8');
+        } catch (error) {
+            console.error('Error saving last read position:', error);
+        }
+    }
+
+    // Function to load the last read position
+    async function loadLastReadPosition() {
+        try {
+            const data = await fs.readFile(path.join(__dirname, 'last_read_position.txt'), 'utf8');
+            lastReadPosition = parseInt(data, 10) || 0;
+        } catch (error) {
+            console.error('Error loading last read position:', error);
+            lastReadPosition = 0;
+        }
+    }
+
     // Function to check if the server process is already running
     async function isServerRunning() {
+        const psList = (await import('ps-list')).default;
         const processes = await psList();
         return processes.some(process => process.name.includes('serverExecutableName')); // Replace 'serverExecutableName' with the actual server executable name
     }
@@ -365,7 +391,8 @@ function initializeBot() {
             return;
         }
 
-        const serverProcess = spawn('path/to/serverExecutable', ['--option1', '--option2']); // Replace with actual server executable and options
+        const serverExecutablePath = 'C:/correct/path/to/serverExecutable'; // Replace with the actual path to the server executable
+        const serverProcess = spawn(serverExecutablePath, ['--option1', '--option2']); // Replace with actual server options
 
         serverProcess.stdout.on('data', (data) => {
             console.log(`Server: ${data}`);
@@ -373,6 +400,36 @@ function initializeBot() {
 
         serverProcess.stderr.on('data', (data) => {
             console.error(`Server Error: ${data}`);
+        });
+
+        serverProcess.on('error', (err) => {
+            if (err.code === 'ENOENT') {
+                console.error(`Server executable not found at path: ${serverExecutablePath}`);
+            } else {
+                console.error(`Failed to start server: ${err.message}`);
+            }
+        });
+
+        serverProcess.on('close', (code) => {
+            console.log(`Server process exited with code ${code}`);
+        });
+    }
+
+    // Function to start the server using the server.bat script
+    async function startServerUsingBat() {
+        const serverBatPath = 'C:/pzserver/server.bat';
+        const serverProcess = spawn('cmd.exe', ['/c', serverBatPath]);
+
+        serverProcess.stdout.on('data', (data) => {
+            console.log(`Server: ${data}`);
+        });
+
+        serverProcess.stderr.on('data', (data) => {
+            console.error(`Server Error: ${data}`);
+        });
+
+        serverProcess.on('error', (err) => {
+            console.error(`Failed to start server using server.bat: ${err.message}`);
         });
 
         serverProcess.on('close', (code) => {
@@ -808,29 +865,16 @@ function initializeBot() {
         }
     });
 
-    // Function to read the death log file and post messages to the death log channel
-    async function readDeathLog() {
-        try {
-            const data = await fs.readFile(deathLogFilePath, 'utf8');
-            const deathMessages = data.trim().split('\n').slice(lastReadPosition);
-            deathMessages.forEach(message => {
-                const channel = client.channels.cache.get(deathLogChannelId);
-                if (channel) {
-                    channel.send(message).catch(console.error);
-                }
-            });
-            lastReadPosition += deathMessages.length;
-        } catch (err) {
-            console.error('Error reading death log file:', err);
-        }
-    }
-
     // Set an interval to read the death log file periodically
-    setInterval(readDeathLog, 60000); // Check every 60 seconds
+    setInterval(async () => {
+        await readDeathLog();
+        await saveLastReadPosition();
+    }, 60000); // Check every 60 seconds
 
     // Load user data on startup
     loadUserData();
     loadShopItems(); // Load shop items on startup
+    loadLastReadPosition(); // Load last read position on startup
 
     // Load the bot token from an environment variable
     const botToken = process.env.BOT_TOKEN;
