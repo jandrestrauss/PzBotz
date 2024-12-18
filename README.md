@@ -18,14 +18,12 @@ This bot is written for people to easily manage their Project Zomboid server usi
 * [Localization](#localization)
 
 # Features
-- Automated server restart schedule with ingame and discord warning. (Warnings are announced when  hour, 30 min, 15 min, 5 min and 1 min left until server restart. Restart interval can be configured with bot commands.)
+- Automated server restart schedule with ingame and discord warning. (Warnings are announced when 1 hour, 30 min, 15 min, 5 min and 1 min left until server restart. Restart interval can be configured with bot commands.)
 ![Automated Server Restart Example](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_1.png)
 - Automated server restart when a mod (workshop item) update has been detected.
 ![Automated Workshop Item Update Server Restart](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_4.png)
 - Executing server commands through bot commands. (For example; saving server, kicking player, teleporting player, starting/stopping rain, making admin and so on. Full list will be at the bottom and will be listed under available commands.)
 ![Server Commands Example](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_3.png)
-- Perk Parser with cache system. (Bot automatically parses the last perk log file that holds the player skills when they login to server. This can be used to aid players that died to a bug but they can't remember their skills. As stated before, server logs the player skills only when they log into server. If player levels up a skill after connecting to server, it won't appear in log unless player logs into server afterwards again.) When command for perk parser is invoked, bot will parse the file and save it contents in memory until cache (in minutes) expires. This is for to increase efficiency as bot will not have to parse the same file each time. In a situation where fresh data needed, **!reset_perk_cache** command can be used to reset the cache.                
-![Perk Parser Example](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_2.png)
 - Auto server start if server quits. This feature useful if combined with mods that quits the server for whatever reason. For example, if you are using a mod that checks mod updates and when detects it, quits the server. With enabling this feature, you won't need to manually run the server. <br>
 ![Auto Server Start Example](https://github.com/egebilecen/PZServerDiscordBot/blob/main/.github/images/bot%20features/Screenshot_5.png)
 - `!get_ram_cpu` command for checking current RAM and CPU usage of the machine.
@@ -53,7 +51,6 @@ This bot is written for people to easily manage their Project Zomboid server usi
 - Automated server restart schedule with in-game and Discord warnings.
 - Automated server restart when a mod update is detected.
 - Execute server commands through Discord bot commands.
-- Perk parser with a caching system to aid players.
 - Auto server start if the server quits unexpectedly.
 - Commands to check RAM and CPU usage, and to backup the server.
 - Localization support for different languages.
@@ -142,8 +139,6 @@ Bot Commands:
 - `!set_mod_update_check_interval` Set the workshop mod update check schedule interval. (in minutes!) (!set_mod_update_check_interval [interval in minutes])<br>
 - `!set_mod_update_restart_timer` Sets the restart timer for server when mod update detected. (in minutes!) (!set_mod_update_restart_timer [timer in minutes])<br>
 - `!toggle_non_public_mod_logging` Bot will print out non-public mods to log channel if enabled. (!toggle_non_public_mod_logging)<br>
-- `!set_perk_cache_duration` Set the perk cache duration. (in minutes!) (!set_perk_cache_duration [duration in minutes])<br>
-- `!reset_perk_cache` Reset the perk cache. (!reset_perk_cache)<br>
 - `!toggle_server_auto_start` Enables/Disables the server auto start feature if server is not running. (!toggle_server_auto_start)<br>
 - `!backup_server` Creates a backup of the server. Backup files can be found in "server_backup" folder in the directory where bot has been launched. (!backup_server)<br>
 - `!localization` Get/change current localization. (!localization [*(optional)* new localization name])<br>
@@ -159,7 +154,6 @@ Server Commands:
 - `!initiate_restart` Initiates a restart. (!initiate_restart [minutes until restart])<br>
 - `!abort_restart` Aborts an upcoming restart. Works both with restart schedule and manual initiated restart. (!abort_restart)<br>
 - `!save_server` Saves the current world. (!save_server)<br>
-- `!perk_info` Displays the perk information of player. (!perk_info "[username]")<br>
 - `!add_user` Adds a new user to the whitelist. (!add_user "[username]" "[password]")<br>
 - `!add_user_to_whitelist` Adds a single user connected with a password to the whitelist. (!add_user_to_whitelist "[username]")<br>
 - `!remove_user_from_white_list` Removes a single user connected with a password to the whitelist. (!remove_user_from_whitelist "[username]")<br>

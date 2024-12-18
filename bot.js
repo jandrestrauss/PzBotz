@@ -26,11 +26,50 @@ const ticketsFilePath = path.join(__dirname, config.ticketsFilePath);
 let lastReadPosition = 0; // Track the last read position in the death log file
 
 // Define your custom wheel spin items and their IDs
-const wheelSpinItems = [
-    { name: 'Custom Item 1', id: 'item_id_1' },
-    { name: 'Custom Item 2', id: 'item_id_2' },
-    { name: 'Custom Item 3', id: 'item_id_3' }
+const defaultWheel = [
+    { name: 'Skill Recovery Journal', id: 'Base.SkillRecoveryBoundJournal' },
+    { name: 'Red Pen', id: 'Base.RedPen' },
+    { name: 'Travel Ticket', id: 'FTWR.TravelTicket' },
+    { name: 'Petrol Can', id: 'Base.PetrolCan' },
+    { name: 'Colt Service 45', id: 'Base.Colt_Service45' },
+    { name: 'Bullets 45 LC Box', id: 'Base.Bullets45LCBox' },
+    { name: 'Scrap Metal', id: 'Base.ScrapMetal' },
+    { name: 'Stone', id: 'Base.Stone' },
+    { name: 'Mirror', id: 'Base.Mirror' },
+    { name: 'Electronics Scrap', id: 'Base.ElectronicsScrap' },
+    { name: 'ALICE Surplus Pack', id: 'Base.Bag_ALICESurpluspack' },
+    { name: 'Big Hiking Bag', id: 'Base.Bag_BigHikingBag' },
+    { name: 'Emergency Food Supply Box', id: 'EHE.EmergencyFoodSupplyBox' },
+    { name: 'Pipe Wrench', id: 'Base.PipeWrench' },
+    { name: 'Military Machete', id: 'SOMW.MilitaryMachete' },
+    { name: 'Solar Panel', id: 'ISA.SolarPanel' },
+    { name: 'Propane Gas Furnace', id: 'TW.PropaneGasFurnace' },
+    { name: 'Welding Mask', id: 'Base.WeldingMask' },
+    { name: 'Fix A Flat', id: 'FixAFlat.FixAFlat' },
+    { name: 'Cmp Syringe With Cure', id: 'LabItems.CmpSyringeWithCure' },
+    { name: 'Cmp Syringe With Serum', id: 'LabItems.CmpSyringeWithSerum' },
+    { name: '762x54r Box', id: 'Base.762x54rBox' },
+    { name: 'Bullets 9mm Box', id: 'Base.Bullets9mmBox' },
+    { name: 'Fishing Rod', id: 'Base.FishingRod' },
+    { name: 'Gardening Spray Empty', id: 'farming.GardeningSprayEmpty' },
+    { name: '82 Porsche 911 Turbo', id: 'Base.82porsche911turbo' },
+    { name: 'Van Spiffo', id: 'Base.VanSpiffo' }
 ];
+
+const premiumWheel = [
+    { name: 'Luxury Car', id: 'Base.CarLuxury' },
+    { name: 'Sports Car', id: 'Base.SportsCar' },
+    { name: 'Helicopter', id: 'Base.BHelicopter' },
+    { name: 'Military Vehicle', id: 'Base.87fordF700swat' },
+    { name: 'High-End Rifle', id: 'Base.50BMGBox' },
+    { name: 'Advanced Solar Panel', id: 'ISA.SolarPanel' },
+    { name: 'High-End Machete', id: 'SOMW.MilitaryMachete' },
+    { name: 'Advanced Welding Mask', id: 'Base.Hat_WelderMask2' },
+    { name: 'Cmp Syringe With Serum', id: 'LabItems.CmpSyringeWithSerum' },
+    { name: 'Cmp Syringe With Cure', id: 'LabItems.CmpSyringeWithCure' }
+];
+
+let currentWheel = defaultWheel;
 
 // Load user points and tickets from persistent storage
 function loadUserData() {
@@ -46,6 +85,13 @@ function loadUserData() {
 function saveUserData() {
     fs.writeFileSync(pointsFilePath, JSON.stringify(userPoints, null, 2), 'utf8');
     fs.writeFileSync(ticketsFilePath, JSON.stringify(userTickets, null, 2), 'utf8');
+}
+
+// Function to assign the reward to the user in-game
+function assignRewardToUser(userId, reward) {
+    // Implement your logic to assign the reward to the user in-game using reward.id
+    // This could involve sending a command to the game server or updating a database
+    console.log(`Assigned ${reward.name} (${reward.id}) to user ${userId}`);
 }
 
 client.on('message', message => {
@@ -107,12 +153,29 @@ client.on('message', message => {
         const userId = message.author.id;
         if (message.author.id === 'your-discord-user-id' || (userTickets[userId] && userTickets[userId] > 0)) {
             if (userTickets[userId]) userTickets[userId] -= 1;
-            const reward = wheelSpinItems[Math.floor(Math.random() * wheelSpinItems.length)];
+            const reward = currentWheel[Math.floor(Math.random() * currentWheel.length)];
             message.channel.send(`Congratulations ${message.author.username}, you won ${reward.name}!`).catch(console.error);
             saveUserData(); // Save user data after wheel spin
-            // Implement your logic to assign the reward to the user in-game using reward.id
+            assignRewardToUser(userId, reward); // Assign the reward to the user in-game
         } else {
             message.channel.send('You do not have a wheel spin ticket.').catch(console.error);
+        }
+    }
+
+    if (command === 'setwheel') {
+        if (message.member.hasPermission('ADMINISTRATOR')) {
+            const wheelName = args[0];
+            if (wheelName === 'default') {
+                currentWheel = defaultWheel;
+                message.channel.send('Switched to the default wheel.').catch(console.error);
+            } else if (wheelName === 'premium') {
+                currentWheel = premiumWheel;
+                message.channel.send('Switched to the premium wheel.').catch(console.error);
+            } else {
+                message.channel.send('Invalid wheel name.').catch(console.error);
+            }
+        } else {
+            message.channel.send('You do not have permission to use this command.').catch(console.error);
         }
     }
 
