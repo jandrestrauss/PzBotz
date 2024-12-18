@@ -1,0 +1,15 @@
+{
+  "name": "pzbotv",
+  "version": "1.0.0",
+  "description": "Project Zomboid Discord Bot for Server Management",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "generate-index": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  },
+  "author": "yourusername",
+  "license": "MIT"
+}
