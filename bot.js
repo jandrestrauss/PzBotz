@@ -841,5 +841,3 @@ function initializeBot() {
     // Schedule regular backups
     scheduleBackups();
 }
-
-    scheduleBackups();
