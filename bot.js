@@ -266,21 +266,46 @@ function initializeBot() {
     async function monitorPlayerEvents() {
         // Implement your logic to monitor player join and disconnect events
         // This could involve querying the game server or checking logs
-        // For demonstration purposes, we'll assume a player joins and disconnects every minute
-        const channel = client.channels.cache.get(deathLogChannelId);
-        if (channel) {
-            channel.send('Player1 has joined the game.').catch(console.error);
-            setTimeout(() => {
-                channel.send('Player1 has left the game.').catch(console.error);
-            }, 60000); // Simulate a player leaving after 1 minute
+        // For demonstration purposes, we'll remove the simulation
+        // const channel = client.channels.cache.get(deathLogChannelId);
+        // if (channel) {
+        //     channel.send('Player1 has joined the game.').catch(console.error);
+        //     setTimeout(() => {
+        //         channel.send('Player1 has left the game.').catch(console.error);
+        //     }, 60000); // Simulate a player leaving after 1 minute
+        // }
+    }
+
+    // Function to test the API connection to BattleMetrics
+    async function testBattleMetricsAPI() {
+        try {
+            const response = await axios.get('https://api.battlemetrics.com/servers/30653650/players');
+            console.log('BattleMetrics API connection successful. Players:', response.data.data.map(player => player.attributes.name));
+        } catch (error) {
+            console.error('Error connecting to BattleMetrics API:', error);
         }
+    }
+
+    // Function to continuously read from the server console
+    function readServerConsole() {
+        const client = connectToGameServer();
+        client.on('data', (data) => {
+            console.log('Server Console:', data.toString());
+        });
+        client.on('close', () => {
+            console.log('Server console connection closed. Reconnecting...');
+            setTimeout(readServerConsole, 5000); // Reconnect after 5 seconds
+        });
     }
 
     // Set an interval to refresh the bot's status every minute
     setInterval(updateBotStatus, 60000);
 
-    // Set an interval to monitor player events every minute
-    setInterval(monitorPlayerEvents, 60000);
+    // Test the BattleMetrics API connection on startup
+    testBattleMetricsAPI();
+
+    // Start reading from the server console
+    readServerConsole();
 
     client.on('message', async message => {
         if (!message.content.startsWith(prefix) || message.author.bot) return;
@@ -698,7 +723,7 @@ function initializeBot() {
     // Function to read the death log file and post messages to the death log channel
     function readDeathLog() {
         fs.open(deathLogFilePath, 'r').then(fd => {
-            return fs.fstat(fd).then(stats => {
+            return fs.stat(deathLogFilePath).then(stats => {
                 if (stats.size > lastReadPosition) {
                     const buffer = Buffer.alloc(stats.size - lastReadPosition);
                     return fs.read(fd, buffer, 0, buffer.length, lastReadPosition).then(({ bytesRead }) => {
