@@ -1,12 +1,12 @@
 {
-  "wheelSpinChannelId": "your_channel_id",
-  "deathLogChannelId": "your_channel_id",
-  "deathLogFilePath": "logs/death_log.txt",
+  "wheelSpinChannelId": "1314751587662561320",
+  "deathLogChannelId": "1317238111838928927",
+  "deathLogFilePath": "C:\\Users\\Administrator\\Zomboid\\Lua\\AdvancedDeathLog\\Most-Recent-Deaths.txt",
   "pointsFilePath": "data/points.json",
   "ticketsFilePath": "data/tickets.json",
   "backupInterval": 1440,
   "logRetentionPeriod": 7,
-  "modUpdateChannelId": "your_channel_id",
-  "statsChannelId": "your_channel_id",
-  "healthChannelId": "your_channel_id"
+  "modUpdateChannelId": "1309013704385237093",
+  "statsChannelId": "1309013704385237094",
+  "healthChannelId": "1309013704385237094"
 }

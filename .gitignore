@@ -1,18 +1,17 @@
 # Sensitive data
 bot_token.txt
-.env
-.env.*
-.env.test
-config.json
-config.test.json
+.env*
+config*.json
 credentials/
 
 # Generated files
 logs/
+logs/*
 data/
+data/*.json
 *.exe
 
-# Dependencies
+# Dependencies and build
 node_modules/
 dist/
 build/
