@@ -8,9 +8,10 @@
     "generate-index": "node index.js"
   },
   "dependencies": {
+    "axios": "^1.6.5",
     "discord.js": "^12.5.3",
     "dotenv": "^16.0.3",
-    "axios": "^1.6.5"
+    "rcon-client": "^4.2.5"
   },
   "author": "yourusername",
   "license": "MIT",

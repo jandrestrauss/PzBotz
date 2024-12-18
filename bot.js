@@ -2,7 +2,7 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const fs = require('fs').promises;
 const path = require('path');
-const net = require('net');
+const { Rcon } = require('rcon-client');
 const axios = require('axios');
 const client = new Discord.Client();
 const prefix = '!';
@@ -218,34 +218,48 @@ function initializeBot() {
         }
     }
 
-    // Function to connect to the game server
-    function connectToGameServer() {
-        const serverConfig = {
-            host: 'your-server-ip', // Replace with your server IP
-            port: 12345 // Replace with your server port
-        };
+    // Function to connect to the game server using RCON
+    async function connectToGameServer() {
+        const rcon = new Rcon({
+            host: '156.38.164.50', // Replace with your actual server IP
+            port: 27015, // Replace with your RCON port
+            password: 'Smart123' // Replace with your RCON password
+        });
 
-        const client = new net.Socket();
-        client.connect(serverConfig.port, serverConfig.host, () => {
+        try {
+            await rcon.connect();
             console.log('Connected to game server');
-        });
+            return rcon;
+        } catch (err) {
+            console.error('Connection error:', err);
+            return null;
+        }
+    }
 
-        client.on('data', (data) => {
-            console.log('Received: ' + data);
-        });
-
-        client.on('close', () => {
-            console.log('Connection closed');
-        });
-
-        return client;
+    // Function to test the server connection
+    async function testServerConnection() {
+        const rcon = await connectToGameServer();
+        if (rcon) {
+            console.log('Test connection successful');
+            rcon.end();
+        } else {
+            console.error('Test connection failed');
+        }
     }
 
     // Function to send a command to the game server
-    function sendCommandToGameServer(command) {
-        const client = connectToGameServer();
-        client.write(command);
-        client.end();
+    async function sendCommandToGameServer(command) {
+        const rcon = await connectToGameServer();
+        if (rcon) {
+            try {
+                const response = await rcon.send(command);
+                console.log('Command response:', response);
+            } catch (err) {
+                console.error('Error sending command:', err);
+            } finally {
+                rcon.end();
+            }
+        }
     }
 
     // Function to get the current online players
@@ -287,15 +301,17 @@ function initializeBot() {
     }
 
     // Function to continuously read from the server console
-    function readServerConsole() {
-        const client = connectToGameServer();
-        client.on('data', (data) => {
-            console.log('Server Console:', data.toString());
-        });
-        client.on('close', () => {
-            console.log('Server console connection closed. Reconnecting...');
-            setTimeout(readServerConsole, 5000); // Reconnect after 5 seconds
-        });
+    async function readServerConsole() {
+        const rcon = await connectToGameServer();
+        if (rcon) {
+            rcon.on('message', (message) => {
+                console.log('Server Console:', message);
+            });
+            rcon.on('end', () => {
+                console.log('Server console connection closed. Reconnecting...');
+                setTimeout(readServerConsole, 5000); // Reconnect after 5 seconds
+            });
+        }
     }
 
     // Set an interval to refresh the bot's status every minute
@@ -306,6 +322,9 @@ function initializeBot() {
 
     // Start reading from the server console
     readServerConsole();
+
+    // Test the server connection on startup
+    testServerConnection();
 
     client.on('message', async message => {
         if (!message.content.startsWith(prefix) || message.author.bot) return;
