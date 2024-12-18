@@ -730,15 +730,16 @@ function initializeBot() {
     loadUserData();
     loadShopItems(); // Load shop items on startup
 
-    // Load the bot token from a secure location
-    fs.readFile(path.join(__dirname, 'bot_token.txt'), 'utf8')
-        .then(botToken => {
-            console.log('Bot token loaded successfully.');
-            client.login(botToken.trim());
-        })
-        .catch(error => {
-            console.error('Error loading bot token:', error);
-        });
+    // Load the bot token from an environment variable
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken) {
+        console.error('Bot token is not set. Please set the BOT_TOKEN environment variable.');
+        process.exit(1);
+    }
+
+    client.login(botToken.trim()).catch(error => {
+        console.error('Error logging in:', error);
+    });
 
     // Function to schedule regular backups
     async function scheduleBackups() {

@@ -11,5 +11,20 @@
     "discord.js": "^12.5.3"
   },
   "author": "yourusername",
-  "license": "MIT"
+  "license": "MIT",
+  "bin": "index.js",
+  "pkg": {
+    "scripts": [
+      "bot.js",
+      "index.js"
+    ],
+    "assets": [
+      "config.json",
+      "bot_token.txt",
+      "user_points.json",
+      "user_tickets.json",
+      "linked_accounts.json",
+      "shop_items.json"
+    ]
+  }
 }
