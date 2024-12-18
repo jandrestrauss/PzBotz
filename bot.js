@@ -3,6 +3,8 @@ const Discord = require('discord.js');
 const fs = require('fs').promises;
 const path = require('path');
 const net = require('net');
+const sqlite3 = require('sqlite3').verbose();
+const axios = require('axios');
 const client = new Discord.Client();
 const prefix = '!';
 
@@ -20,11 +22,12 @@ let config;
 function initializeBot() {
     const wheelSpinChannelId = config?.wheelSpinChannelId;
     const deathLogChannelId = config?.deathLogChannelId;
-    const deathLogFilePath = path.join(__dirname, config?.deathLogFilePath);
+    const deathLogFilePath = config?.deathLogFilePath; // Use absolute path directly
     const pointsFilePath = path.join(__dirname, config?.pointsFilePath);
     const ticketsFilePath = path.join(__dirname, config?.ticketsFilePath);
     const linkedAccountsFilePath = path.join(__dirname, 'linked_accounts.json');
     const modDataFilePath = path.join(__dirname, 'mod_data.bin');
+    const dbPath = path.join(__dirname, 'path/to/servertest.db');
 
     const shopItems = {
         'wheelspin_ticket': { name: 'Wheel Spin Ticket', price: 500 }
@@ -90,18 +93,29 @@ function initializeBot() {
     // Load user points, tickets, and linked accounts from persistent storage
     async function loadUserData() {
         try {
-            await fs.access(pointsFilePath);
+            try {
+                await fs.access(pointsFilePath);
+            } catch {
+                await fs.writeFile(pointsFilePath, JSON.stringify({ points: {} }, null, 2));
+            }
             userPoints = JSON.parse(await fs.readFile(pointsFilePath, 'utf8'));
             console.log('User points loaded successfully.');
         } catch (error) {
             console.error('Error loading user points:', error);
+            userPoints = { points: {} };
         }
+
         try {
-            await fs.access(ticketsFilePath);
+            try {
+                await fs.access(ticketsFilePath);
+            } catch {
+                await fs.writeFile(ticketsFilePath, JSON.stringify({ tickets: {} }, null, 2));
+            }
             userTickets = JSON.parse(await fs.readFile(ticketsFilePath, 'utf8'));
             console.log('User tickets loaded successfully.');
         } catch (error) {
             console.error('Error loading user tickets:', error);
+            userTickets = { tickets: {} };
         }
         try {
             await fs.access(linkedAccountsFilePath);
@@ -123,13 +137,16 @@ function initializeBot() {
         }
     }
 
-    // Function to verify if the in-game account exists
+    // Function to verify if the in-game account exists using BattleMetrics API
     async function verifyInGameAccount(accountName) {
-        // Implement your logic to verify if the in-game account exists
-        // This could involve querying the game server or checking a list of valid accounts
-        // For demonstration purposes, we'll assume the account exists if it matches a certain pattern
-        const validAccounts = ['Player1', 'Player2', 'Player3']; // Replace with actual verification logic
-        return validAccounts.includes(accountName);
+        try {
+            const response = await axios.get('https://api.battlemetrics.com/servers/30653650/players');
+            const players = response.data.data.map(player => player.attributes.name);
+            return players.includes(accountName);
+        } catch (error) {
+            console.error('Error fetching player list from BattleMetrics:', error);
+            return false;
+        }
     }
 
     // Function to read server points from mod data
@@ -541,15 +558,13 @@ function initializeBot() {
                 // Implement logic to fetch and display player statistics
                 const playtime = 100; // Replace with actual logic to get playtime
                 const kills = 50; // Replace with actual logic to get kills
-                const deaths = 10; // Replace with actual logic to get deaths
 
                 const embed = new Discord.MessageEmbed()
                     .setTitle('Player Statistics')
                     .setDescription(`Statistics for ${accountName}`)
                     .setColor('#7289DA')
                     .addField('Playtime', `${playtime} hours`, true)
-                    .addField('Kills', `${kills}`, true)
-                    .addField('Deaths', `${deaths}`, true);
+                    .addField('Kills', `${kills}`, true);
 
                 message.channel.send(embed).catch(console.error);
             }
@@ -684,28 +699,11 @@ function initializeBot() {
 
     // Function to read the death log file and post messages to the death log channel
     function readDeathLog() {
-        fs.open(deathLogFilePath, 'r', (err, fd) => {
-            if (err) {
-                console.error('Error opening death log file:', err);
-                return;
-            }
-
-            fs.fstat(fd, (err, stats) => {
-                if (err) {
-                    console.error('Error getting file stats:', err);
-                    fs.close(fd, () => {});
-                    return;
-                }
-
+        fs.open(deathLogFilePath, 'r').then(fd => {
+            return fs.fstat(fd).then(stats => {
                 if (stats.size > lastReadPosition) {
                     const buffer = Buffer.alloc(stats.size - lastReadPosition);
-                    fs.read(fd, buffer, 0, buffer.length, lastReadPosition, (err, bytesRead) => {
-                        if (err) {
-                            console.error('Error reading death log file:', err);
-                            fs.close(fd, () => {});
-                            return;
-                        }
-
+                    return fs.read(fd, buffer, 0, buffer.length, lastReadPosition).then(({ bytesRead }) => {
                         const deathMessages = buffer.toString('utf8').trim().split('\n');
                         deathMessages.forEach(message => {
                             const channel = client.channels.cache.get(deathLogChannelId);
@@ -713,14 +711,14 @@ function initializeBot() {
                                 channel.send(message).catch(console.error);
                             }
                         });
-
                         lastReadPosition += bytesRead;
-                        fs.close(fd, () => {});
-                    });
+                    }).finally(() => fs.close(fd));
                 } else {
-                    fs.close(fd, () => {});
+                    return fs.close(fd);
                 }
             });
+        }).catch(err => {
+            console.error('Error reading death log file:', err);
         });
     }
 
@@ -788,8 +786,7 @@ function initializeBot() {
                 .setDescription('Current player statistics:')
                 .setColor('#7289DA')
                 .addField('Total Playtime', `${stats.totalPlaytime} hours`, true)
-                .addField('Total Kills', `${stats.totalKills}`, true)
-                .addField('Total Deaths', `${stats.totalDeaths}`, true);
+                .addField('Total Kills', `${stats.totalKills}`, true);
 
             channel.send(embed).catch(console.error);
         }
@@ -801,8 +798,7 @@ function initializeBot() {
         // For demonstration purposes, we'll return dummy data
         return {
             totalPlaytime: 1000,
-            totalKills: 500,
-            totalDeaths: 100
+            totalKills: 500
         };
     }
 
@@ -828,6 +824,7 @@ function initializeBot() {
     // Function to get server health
     async function getServerHealth() {
         // Implement your logic to get server health
+    // Schedule regular backups
         // For demonstration purposes, we'll return dummy data
         return {
             status: 'healthy',
@@ -846,3 +843,5 @@ function initializeBot() {
     // Schedule regular backups
     scheduleBackups();
 }
+
+    scheduleBackups();
