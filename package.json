@@ -8,7 +8,8 @@
     "generate-index": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^12.5.3"
+    "discord.js": "^12.5.3",
+    "dotenv": "^16.0.3"
   },
   "author": "yourusername",
   "license": "MIT",
