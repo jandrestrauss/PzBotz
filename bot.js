@@ -4,7 +4,6 @@ const fs = require('fs').promises;
 const path = require('path');
 const { Rcon } = require('rcon-client');
 const axios = require('axios');
-// const psList = require('ps-list'); // Remove this line
 const { spawn } = require('child_process');
 const client = new Discord.Client();
 const prefix = '!';
