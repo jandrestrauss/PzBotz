@@ -1,0 +1,9 @@
+{
+    "spinPrice": 500,
+    "serverPointsPerSpin": 100,
+    "prizes": [
+        { "name": "Military Backpack", "id": "Base.ALICEpack", "weight": 10, "points": 1000 },
+        { "name": "Katana", "id": "Base.Katana", "weight": 5, "points": 2000 },
+        { "name": "Ammo Box", "id": "Base.Bullets45Box", "weight": 15, "points": 500 }
+    ]
+}

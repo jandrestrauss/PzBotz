@@ -8,5 +8,11 @@
   "logRetentionPeriod": 7,
   "modUpdateChannelId": "1309013704385237093",
   "statsChannelId": "1309013704385237094",
-  "healthChannelId": "1309013704385237094"
+  "healthChannelId": "1309013704385237094",
+  "rcon": {
+    "host": "localhost",
+    "port": 27015,
+    "password": "your_rcon_password",
+    "reconnectInterval": 30000
+  }
 }

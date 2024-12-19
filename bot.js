@@ -7,6 +7,11 @@ const axios = require('axios');
 const { spawn } = require('child_process');
 const client = new Discord.Client();
 const prefix = '!';
+const RconHandler = require('./src/rconHandler');
+const rconClient = new RconHandler();
+const os = require('os');
+const disk = require('diskusage');
+const pidusage = require('pidusage');
 
 // Load configuration values
 let config;
@@ -273,16 +278,26 @@ async function initializeBot() {
 
     // Function to get the current online players
     async function getOnlinePlayers() {
-        // Implement your logic to get the current online players
-        // This could involve querying the game server or checking a list of online players
-        // For demonstration purposes, we'll assume there are 5 players online
-        return 5; // Replace with actual logic to get online players
+        try {
+            const response = await rcon.send('players');
+            const players = response.split('\n')
+                .filter(line => line.includes('steam id'))
+                .map(line => {
+                    const matches = line.match(/(.+?)\s*\(steam id/);
+                    return matches ? matches[1].trim() : null;
+                })
+                .filter(Boolean);
+            return players;
+        } catch (error) {
+            console.error('Error getting online players:', error);
+            return [];
+        }
     }
 
     // Function to update the bot's status with the number of online players
     async function updateBotStatus() {
         const onlinePlayers = await getOnlinePlayers();
-        client.user.setActivity(`${onlinePlayers} players online`, { type: 'WATCHING' });
+        client.user.setActivity(`${onlinePlayers.length} players online`, { type: 'WATCHING' });
     }
 
     // Function to monitor player join and disconnect events
@@ -318,17 +333,69 @@ async function initializeBot() {
 
     // Function to continuously read from the server console
     async function readServerConsole() {
-        const rcon = await connectToGameServer();
-        if (rcon) {
-            rcon.on('message', (message) => {
-                console.log('Server Console:', message);
+        try {
+            const rcon = await connectToGameServer();
+            if (!rcon) {
+                console.error('Failed to connect to server console. Retrying in 5 seconds...');
+                setTimeout(readServerConsole, 5000);
+                return;
+            }
+
+            console.log('Connected to server console');
+
+            // Set up event handlers
+            rcon.on('connect', () => {
+                console.log('Server console connection established');
             });
+
+            rcon.on('authenticated', () => {
+                console.log('Authenticated with server console');
+                // Subscribe to console output
+                rcon.send('servermsg "Discord bot connected to server console"');
+            });
+
+            rcon.on('message', (message) => {
+                // Log server console messages
+                console.log(`Server Console: ${message}`);
+                
+                // Check for specific message types
+                if (message.includes('Player connected')) {
+                    // Handle player connection
+                    const username = message.split('Player connected')[1].trim();
+                    console.log(`Player connected: ${username}`);
+                } else if (message.includes('Player disconnected')) {
+                    // Handle player disconnection  
+                    const username = message.split('Player disconnected')[1].trim();
+                    console.log(`Player disconnected: ${username}`);
+                }
+            });
+
+            rcon.on('error', (error) => {
+                console.error('Server console error:', error);
+                rcon.end();
+            });
+
             rcon.on('end', () => {
                 console.log('Server console connection closed. Reconnecting...');
-                setTimeout(readServerConsole, 5000); // Reconnect after 5 seconds
+                setTimeout(readServerConsole, 5000); // Retry connection after 5 seconds
             });
+
+        } catch (error) {
+            console.error('Error connecting to server console:', error);
+            setTimeout(readServerConsole, 5000); // Retry connection after 5 seconds
         }
     }
+
+    // Start reading from server console when bot initializes
+    readServerConsole();
+
+    // Add this to your existing intervals
+    setInterval(() => {
+        if (!isServerRunning()) {
+            console.log('Server not running, attempting to reconnect console...');
+            readServerConsole();
+        }
+    }, 60 * 1000); // Check connection every minute
 
     // Function to read the death log file and post messages to the death log channel
     async function readDeathLog() {
@@ -858,6 +925,12 @@ async function initializeBot() {
                 sendCommandToGameServer(command);
                 message.channel.send('Workshop mod(s) removed.').catch(console.error);
             }
+
+            if (command === 'server_cmd') {
+                const serverCommand = args.join(' ');
+                await sendCommandToGameServer(serverCommand);
+                message.channel.send(`Command sent to server: ${serverCommand}`);
+            }
         } catch (error) {
             console.error('Error processing command:', error);
             message.channel.send('An error occurred while processing your command. Please try again later.').catch(console.error);
@@ -993,44 +1066,51 @@ async function initializeBot() {
     // Function to get server health
     async function getServerHealth() {
         try {
-            const cpuUsage = await getCpuUsage();
-            const memoryUsage = await getMemoryUsage();
-            const diskSpace = await getDiskSpace();
-
+            const stats = await getServerStats();
+            const players = await getOnlinePlayers();
+            
             return {
                 status: 'healthy',
-                cpuUsage,
-                memoryUsage,
-                diskSpace
+                uptime: stats.uptime,
+                players: players.length,
+                cpuUsage: stats.cpu,
+                memoryUsage: stats.memory,
+                diskSpace: stats.disk
             };
         } catch (error) {
             console.error('Error getting server health:', error);
-            return {
-                status: 'unhealthy',
-                cpuUsage: 0,
-                memoryUsage: 0,
-                diskSpace: 0
-            };
+            return { status: 'unhealthy' };
         }
     }
 
-    // Helper functions to get CPU, memory, and disk space usage
-    async function getCpuUsage() {
-        // Implement your logic to get CPU usage
-        // For demonstration purposes, we'll return a dummy value
-        return 30;
+    async function getServerStats() {
+        try {
+            const serverPid = await getServerPID();
+            const stats = await pidusage(serverPid);
+            const root = '/';
+            const diskInfo = await disk.check(root);
+
+            return {
+                cpu: Math.round(stats.cpu),
+                memory: Math.round(stats.memory / 1024 / 1024), // Convert to MB
+                uptime: Math.round(stats.elapsed / 1000 / 60), // Convert to minutes
+                disk: Math.round((diskInfo.total - diskInfo.free) / diskInfo.total * 100)
+            };
+        } catch (error) {
+            console.error('Error getting server stats:', error);
+            throw error;
+        }
     }
 
-    async function getMemoryUsage() {
-        // Implement your logic to get memory usage
-        // For demonstration purposes, we'll return a dummy value
-        return 40;
-    }
-
-    async function getDiskSpace() {
-        // Implement your logic to get disk space usage
-        // For demonstration purposes, we'll return a dummy value
-        return 70;
+    async function getServerPID() {
+        try {
+            // Read PID from server's .pid file or process list
+            // Implementation depends on server setup
+            return process.pid; // Placeholder
+        } catch (error) {
+            console.error('Error getting server PID:', error);
+            throw error;
+        }
     }
 
     // Function to check server health
@@ -1061,3 +1141,34 @@ async function initializeBot() {
     // Schedule regular backups
     scheduleBackups();
 }
+
+client.on('messageCreate', async message => {
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
+    
+    // Ensure RCON connection
+    if (!rconClient.isConnected) {
+        await rconClient.connect();
+    }
+
+    // Modify wheelspin command
+    if (command === 'wheelspin') {
+        // ...existing code...
+        const result = await rconClient.sendCommand(`additem ${winner.steamid} ${prize.id} 1`);
+        // ...existing code...
+    }
+
+    // Modify health check
+    if (command === 'health') {
+        const serverStatus = await rconClient.sendCommand('status');
+        // ...existing code...
+    }
+});
+
+// Add console monitoring
+setInterval(async () => {
+    if (!rconClient.isConnected) {
+        await rconClient.connect();
+    }
+    const serverOutput = await rconClient.sendCommand('monitor');
+    console.log('Server Output:', serverOutput);
+}, 30000);
