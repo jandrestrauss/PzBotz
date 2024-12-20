@@ -190,6 +190,48 @@ Server Commands:
 - `!godmode` Makes a player invincible. (!godmode "[username]")<br>
 - `!invisible` Makes a player invisible to zombies. (!invisible "[username]")<br>
 - `!noclip` Allows a player to pass through solid objects. (!noclip "[username]")<br>
+- `!server` - Server management (continued)
+  - `whitelist add/remove <username>` - Manage whitelist
+  - `mods list/enable/disable <modId>` - Manage server mods
+  - `config <setting> <value>` - Update server settings
+  - `save` - Force save world data
+  - `clean` - Clean up server resources
+  - `reset` - Reset world (requires confirmation)
+
+### Server Configuration
+- `!config` - Server configuration
+  - `view` - Show current configuration
+  - `set <option> <value>` - Update setting
+  - `reload` - Reload configuration
+
+### World Management
+- `!world` - World management
+  - `time <hour>` - Set world time
+  - `weather <type>` - Set weather condition
+  - `zombies <action>` - Manage zombie spawns
+  - `safehouse <action>` - Manage safehouses
+
+### Economy Commands
+- `!economy` - Economy management
+  - `give <player> <amount>` - Give points
+  - `take <player> <amount>` - Remove points
+  - `set <player> <amount>` - Set points
+  - `reset` - Reset all points (requires confirmation)
+
+### Channel Management
+- `!channel` - Channel configuration
+  - `public add/remove` - Set public command channels
+  - `admin add/remove` - Set admin command channels
+  - `log set` - Set logging channel
+
+## Permission Levels
+- **Player**: Basic commands
+- **Moderator**: Player management
+- **Admin**: Full server control
+- **Owner**: Configuration access
+
+## Support
+For issues and feature requests, please create an issue on GitHub.
 
 # Localization
 You can find the default localization file in [here](https://github.com/yourusername/PZBotV/blob/main/localization/default.json). All you need to do is downloading it and translating the all words/sentences in the right side of **":"** between **two quote marks**. Example below will illustrate how it should look like after the translation.
@@ -240,44 +282,119 @@ hours ago {hours} -> hours ago 10
 
 After you have completed translating all words/sentences, please create an [issue](https://github.com/yourusername/PZBotV/issues/new/choose) by selecting the **Localization Submission** template with the title of `Localization of <language here>` and attaching the translated `.json` file in a **zip archive**. I will add it to available localizations. Also, when a new version of the bot released, there might be new added text so it is good to keep an eye on updates. If your current localization is missing the new added text, bot will use the default localization for these.
 
-# PZBotV
+# Project Zomboid Discord Bot
 
-## Project Description
-PZBotV is a bot designed to [briefly describe the main functionality of your bot].
+## Description
+A Discord bot for managing Project Zomboid servers with in-game account linking, points system, and comprehensive server management.
 
 ## Features
-- Feature 1: [Description of feature 1]
-- Feature 2: [Description of feature 2]
-- Feature 3: [Description of feature 3]
+- Account linking through in-game verification
+- Player statistics and points tracking
+- Server management (restart, backup, monitoring)
+- Wheelspin rewards system
+- Admin controls and monitoring
+- Public/Admin channel management
+- Automated server restarts
+- Server performance monitoring
+- World management tools
 
-## Installation
-To install the project, follow these steps:
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/PZBotV.git
-    ```
-2. Navigate to the project directory:
-    ```bash
-    cd PZBotV
-    ```
-3. Install the dependencies:
-    ```bash
-    npm install
-    ```
-
-## Usage
-To run the bot, use the following command:
-```bash
-npm start
+## Setup
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Configure `.env`:
+```properties
+DISCORD_TOKEN=your_discord_token
+PREFIX=!
+PZ_SERVER_HOST=your_server_host
+PZ_SERVER_RCON_PORT=your_rcon_port
+PZ_SERVER_RCON_PASSWORD=your_rcon_password
+PZ_SERVER_PATH=your_server_path
 ```
 
-## Contributing
-If you would like to contribute to this project, please follow these steps:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a pull request.
+## Commands
+- `!stats`: Get player statistics
+- `!health`: Get server health
+- `!backup`: Backup the server
+- `!togglePublicCommand`: Toggle public command access for a channel
+- `!link`: Link your Steam account
+- `!unlink`: Unlink your Steam account
+- `!server <subcommand>`: Server management commands
+  - `restart`: Restart the server
+  - `schedule <times>`: Schedule server restarts
+  - `kick <username>`: Kick a player
+  - `ban <username> <reason>`: Ban a player
+  - `whitelist <add|remove> <username>`: Manage whitelist
+  - `status`: Get server status
+  - `backup`: Create a server backup
+  - `console <command>`: Execute a console command
+
+### Public Commands
+- `!link` - Link your game account to Discord
+  - Usage: Type `!link` and follow DM instructions
+- `!stats` - View your game statistics
+  - Usage: `!stats` or `!stats <playername>`
+- `!points` - Check your points balance
+  - Usage: `!points`
+- `!wheel` - Spin the reward wheel (costs points)
+  - Usage: `!wheel`
+- `!leaderboard` - View top players
+  - Usage: `!leaderboard`
+  - `!server` - View top players
+  - Usage: `!server`
+
+### Admin Commands
+- `!server` - Server management
+  - `restart` - Restart the server immediately
+  - `schedule <time>` - Schedule automatic restarts
+  - `backup` - Create server backup
+  - `status` - View detailed server status
+  - `kick <username>` - Kick player from server
+  - `ban <username> <reason>` - Ban player with reason
+  - `unban <username>` - Remove player ban
+  - `whitelist <add|remove> <username>` - Manage whitelist
+  - `config <setting> <value>` - Update server settings
+  - `console <command>` - Execute RCON command
+  - `whitelist add/remove <username>` - Manage whitelist
+  - `mods list/enable/disable <modId>` - Manage server mods
+  - `config <setting> <value>` - Update server settings
+  - `save` - Force save world data
+  - `clean` - Clean up server resources
+  - `reset` - Reset world (requires confirmation)
+
+### Server Configuration
+- `!config` - Server configuration
+  - `view` - Show current configuration
+  - `set <option> <value>` - Update setting
+  - `reload` - Reload configuration
+
+### World Management
+- `!world` - World management
+  - `time <hour>` - Set world time
+  - `weather <type>` - Set weather condition
+  - `zombies <action>` - Manage zombie spawns
+  - `safehouse <action>` - Manage safehouses
+
+### Economy Commands
+- `!economy` - Economy management
+  - `give <player> <amount>` - Give points
+  - `take <player> <amount>` - Remove points
+  - `set <player> <amount>` - Set points
+  - `reset` - Reset all points (requires confirmation)
+
+### Channel Management
+- `!channel` - Channel configuration
+  - `public add/remove` - Set public command channels
+  - `admin add/remove` - Set admin command channels
+  - `log set` - Set logging channel
+
+## Permission Levels
+- **Player**: Basic commands
+- **Moderator**: Player management
+- **Admin**: Full server control
+- **Owner**: Configuration access
+
+## Support
+For issues and feature requests, please create an issue on GitHub.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - See LICENSE file for details
