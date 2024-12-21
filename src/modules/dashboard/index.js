@@ -44,19 +44,19 @@ const logger = require('../utils/logger');
  */
 
 /**
- * @typedef {Object} SystemHealth
- * @property {string} status - Current health status
- * @property {Object} metrics - System resource metrics
- * @property {number} connections - Active WebSocket connections
- * @property {string} lastCheck - Last health check timestamp
- */
-
-/**
  * @typedef {Object} MonitorConfig
  * @property {number} interval - Monitoring interval in ms
  * @property {boolean} enabled - Monitoring enabled flag
  * @property {string[]} metrics - Metrics to collect
  * @property {Object} thresholds - Alert thresholds
+ */
+
+/**
+ * @typedef {Object} SystemHealth
+ * @property {string} status - Current health status
+ * @property {Object} metrics - System resource metrics
+ * @property {number} connections - Active WebSocket connections
+ * @property {string} lastCheck - Last health check timestamp
  */
 
 /**
@@ -114,10 +114,34 @@ const logger = require('../utils/logger');
 
 /**
  * @typedef {Object} ResourceUsage
- * @property {number} heapUsed - Heap memory usage
- * @property {number} external - External memory usage
- * @property {Object} cpu - CPU usage stats
- * @property {number} uptime - Process uptime
+ * @property {number} heapUsed - Heap memory usage in bytes
+ * @property {number} external - External memory usage in bytes
+ * @property {Object} cpu - CPU usage statistics
+ * @property {number} uptime - Process uptime in seconds
+ */
+
+/**
+ * @typedef {Object} ConnectionStats
+ * @property {number} current - Current active connections
+ * @property {number} peak - Peak connection count
+ * @property {number} total - Total connection attempts
+ * @property {Object} history - Connection history data
+ */
+
+/**
+ * @typedef {Object} BackupStatus
+ * @property {string} lastBackup - Last backup timestamp
+ * @property {number} backupSize - Backup size in bytes
+ * @property {number} backupCount - Total backups stored
+ * @property {Object} schedule - Backup schedule info
+ */
+
+/**
+ * @typedef {Object} MarketStats 
+ * @property {number} totalListings - Active market listings
+ * @property {number} totalVolume - Trading volume
+ * @property {Object} itemStats - Per-item trading stats
+ * @property {Object} priceHistory - Price history data
  */
 
 /**
@@ -125,6 +149,30 @@ const logger = require('../utils/logger');
  * @property {boolean} running - Running status
  * @property {number} uptime - Uptime in seconds
  * @property {number} connections - Active connections
+ */
+
+/**
+ * @typedef {Object} DashboardStatus
+ * @property {boolean} running - Dashboard running state
+ * @property {string} version - Dashboard version
+ * @property {Object} server - Server connection status
+ * @property {Object} monitor - Monitoring system status
+ * @property {Object} services - Active services status
+ * @property {string} startTime - Dashboard start timestamp
+ * @property {number} uptime - Dashboard uptime in seconds
+ * @property {Object} performance - Performance metrics
+ * @property {Object} errors - Error tracking data
+ */
+
+/**
+ * @typedef {Object} ServerStatus
+ * @property {boolean} online - Server online status
+ * @property {string} version - Server version
+ * @property {number} players - Connected players
+ * @property {Object} performance - Server performance
+ * @property {Object} resources - Resource usage
+ * @property {Object} mods - Active mods status
+ * @property {string} lastUpdate - Last status update
  */
 
 /**
@@ -150,14 +198,30 @@ class Dashboard {
                 url: process.env.REDIS_URL,
                 prefix: 'dashboard:'
             },
+            security: {
+                helmet: {
+                    contentSecurityPolicy: {
+                        directives: {
+                            defaultSrc: ["'self'"],
+                            scriptSrc: ["'self'", "'unsafe-inline'"],
+                            styleSrc: ["'self'", "'unsafe-inline'"],
+                            imgSrc: ["'self'", "data:", "https:"]
+                        }
+                    }
+                },
+                cors: {
+                    origin: process.env.ALLOWED_ORIGINS?.split(',') || false,
+                    credentials: true
+                }
+            },
             ...config
         };
 
-        // Setup services
+        // Initialize services
         this.monitor = new DashboardMonitor();
         this.serverController = new ServerController(this.monitor);
         
-        // Initialize dashboard
+        // Setup core functionality
         this.setupErrorHandlers();
         this.setupMiddleware();
         this.setupSecurity();
@@ -491,10 +555,6 @@ class Dashboard {
             this.setupWebSocket();
             await this.monitor.start();
             this.running = true;
-            
-            // Start monitoring intervals
-            this.startMonitoringIntervals();
-            
             logger.info(`Dashboard running on port ${this.config.port}`);
             return true;
         } catch (error) {
@@ -506,17 +566,11 @@ class Dashboard {
 
     async stop() {
         try {
-            // Clear monitoring intervals
-            if (this.intervals) {
-                Object.values(this.intervals).forEach(clearInterval);
-                this.intervals = null;
-            }
-
-            // Stop core services
             if (this.monitor) await this.monitor.stop();
             if (this.io) await new Promise(resolve => this.io.close(resolve));
-            if (this.server) await new Promise(resolve => this.server.close(resolve));
-
+            if (this.server) {
+                await new Promise(resolve => this.server.close(resolve));
+            }
             this.running = false;
             logger.info('Dashboard stopped successfully');
         } catch (error) {
@@ -534,29 +588,14 @@ class Dashboard {
      * @returns {HealthStatus} System health metrics
      */
     getHealth() {
-        try {
-            return {
-                status: this.running ? 'healthy' : 'stopped',
-                metrics: {
-                    memory: process.memoryUsage(),
-                    cpu: process.cpuUsage(),
-                    connections: this.io?.sockets.sockets.size || 0
-                },
-                server: {
-                    status: this.monitor?.getServerStatus() || 'unknown',
-                    players: this.monitor?.getPlayerCount() || 0,
-                    performance: this.monitor?.getPerformanceMetrics() || {}
-                },
-                lastCheck: new Date().toISOString()
-            };
-        } catch (error) {
-            logger.error('Health check failed:', error);
-            return {
-                status: 'error',
-                error: error.message,
-                lastCheck: new Date().toISOString()
-            };
-        }
+        return {
+            status: this.running ? 'healthy' : 'stopped',
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            connections: this.io?.sockets.sockets.size || 0,
+            monitoring: this.monitor?.isRunning() || false,
+            lastCheck: new Date().toISOString()
+        };
     }
 
     /**
