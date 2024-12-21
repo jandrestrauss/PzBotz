@@ -627,52 +627,53 @@ class Dashboard {
      * @returns {ServerMetrics} Server performance data
      */
     getServerMetrics() {
-        try {
-            return {
-                status: this.monitor?.getServerStatus() || 'unknown',
-                performance: this.monitor?.getPerformanceMetrics() || {},
-                players: this.monitor?.getActivePlayerCount() || 0,
-                economy: this.monitor?.getEconomyStats() || {},
-                lastUpdate: new Date().toISOString()
-            };
-        } catch (error) {
-            logger.error('Server metrics failed:', error);
-            return {
-                status: 'error',
-                error: error.message,
-                lastUpdate: new Date().toISOString()
-            };
-        }
+        return {
+            status: this.monitor?.getServerStatus() || 'unknown',
+            performance: this.monitor?.getPerformanceMetrics() || {},
+            players: this.monitor?.getActivePlayerCount() || 0,
+            lastUpdate: new Date().toISOString()
+        };
     }
 
     /**
-     * Get system resource usage
-     * @returns {ResourceMetrics} System resource statistics
+     * Get system resource metrics
+     * @returns {DashboardMetrics} System resource metrics
      */
     getResourceMetrics() {
-        try {
-            return {
-                system: {
-                    memory: process.memoryUsage(),
-                    cpu: process.cpuUsage(),
-                    heap: process.memoryUsage().heapUsed,
-                    external: process.memoryUsage().external,
-                    uptime: process.uptime()
-                },
-                connections: {
-                    active: this.io?.sockets.sockets.size || 0,
-                    total: this.monitor?.getTotalConnections() || 0
-                },
-                server: this.monitor?.getResourceUsage() || {},
-                lastUpdate: new Date().toISOString()
-            };
-        } catch (error) {
-            logger.error('Resource metrics failed:', error);
-            return {
-                error: error.message,
-                lastUpdate: new Date().toISOString()
-            };
-        }
+        return {
+            cpu: process.cpuUsage(),
+            memory: process.memoryUsage(),
+            heap: process.memoryUsage().heapUsed,
+            external: process.memoryUsage().external,
+            uptime: process.uptime()
+        };
+    }
+
+    /**
+     * Get aggregated dashboard statistics
+     * @returns {Object} Dashboard statistics
+     */
+    getDashboardStats() {
+        return {
+            status: this.running ? 'healthy' : 'stopped',
+            serverMetrics: this.monitor?.getStatus() || 'unknown',
+            playerCount: this.monitor?.getPlayerCount() || 0,
+            uptime: process.uptime(),
+            lastCheck: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Get server performance metrics
+     * @returns {Object} Server performance data
+     */
+    getServerMetrics() {
+        return {
+            status: this.monitor?.getServerStatus() || 'unknown',
+            performance: this.monitor?.getPerformanceMetrics() || {},
+            players: this.monitor?.getActivePlayerCount() || 0,
+            lastUpdate: new Date().toISOString()
+        };
     }
 }
 
