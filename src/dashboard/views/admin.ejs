@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="control-panel">
+            <div class="server-controls">
+                <h2>Server Controls</h2>
+                <button id="startServer">Start Server</button>
+                <button id="stopServer">Stop Server</button>
+                <button id="restartServer">Restart Server</button>
+                <button id="backupServer">Backup Server</button>
+            </div>
+
+            <div class="mod-management">
+                <h2>Mod Management</h2>
+                <div class="mod-list" id="modList">
+                    <!-- Mods will be populated here -->
+                </div>
+                <button id="checkModUpdates">Check Updates</button>
+            </div>
+
+            <div class="player-management">
+                <h2>Player Management</h2>
+                <div class="online-players" id="onlinePlayers">
+                    <!-- Online players will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

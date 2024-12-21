@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PZ Server Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="server-status">
+            <h2>Server Status</h2>
+            <div id="status-indicator" class="<%= serverStatus ? 'online' : 'offline' %>">
+                <%= serverStatus ? 'Online' : 'Offline' %>
+            </div>
+            <div class="player-count">
+                Players Online: <%= playerCount %>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <canvas id="playerChart"></canvas>
+            <canvas id="resourceChart"></canvas>
+        </div>
+        
+        <div class="controls-container">
+            <button id="restartServer">Restart Server</button>
+            <button id="backupServer">Backup Server</button>
+        </div>
+    </div>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

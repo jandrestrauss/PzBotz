@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Monitor</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="monitor-container">
+        <h1>Server Performance Monitor</h1>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <canvas id="cpuChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="memoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="diskChart"></canvas>
+            </div>
+        </div>
+
+        <div class="system-info">
+            <div id="uptimeDisplay">Uptime: --:--:--</div>
+            <div id="playersOnline">Players Online: 0</div>
+        </div>
+    </div>
+    
+    <script src="/js/monitor.js"></script>
+</body>
+</html>
