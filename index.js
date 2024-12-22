@@ -2,6 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { runMigrations } = require('./src/database/migrations');
 const { updateDocumentation } = require('./src/documentation/documentation');
+const advancedMetrics = require('./src/monitoring/advancedMetrics');
+const { connectToGameServer } = require('./src/utils/connectToGameServer');
+const { isServerRunning } = require('./src/utils/serverUtils');
 
 const directoryPath = path.join(__dirname);
 const outputFilePath = path.join(__dirname, 'INDEX.md');
@@ -91,6 +94,9 @@ async function initializeApp() {
     await runMigrations();
     updateDocumentation();
     readServerConsole();
+
+    // Initialize and start monitoring
+    advancedMetrics.startMonitoring();
 
     // Add this to your existing intervals
     setInterval(() => {

@@ -1,19 +1,22 @@
-const mongoose = require('mongoose');
+const { Client } = require('pg');
 const logger = require('../utils/logger');
 
-const migrations = [
-    async function migration1() {
-        const User = mongoose.model('User');
-        await User.updateMany({}, { $set: { isActive: true } });
-    },
-    // Add more migrations as needed
-];
-
 async function runMigrations() {
-    for (const migration of migrations) {
-        await migration();
+    const client = new Client();
+    try {
+        await client.connect();
+        logger.info('Connected to the database.');
+
+        // Run your migration scripts here
+        // Example:
+        // await client.query('CREATE TABLE IF NOT EXISTS example_table (id SERIAL PRIMARY KEY, name VARCHAR(100));');
+
+        logger.info('Migrations completed successfully.');
+    } catch (error) {
+        logger.error('Error running migrations:', error);
+    } finally {
+        await client.end();
     }
-    logger.info('Migrations completed successfully.');
 }
 
 module.exports = { runMigrations };

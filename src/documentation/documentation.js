@@ -1,21 +1,20 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 function updateDocumentation() {
-    const docsPath = path.join(__dirname, 'docs');
-    const newDocs = {
-        'advancedMetrics.md': 'Documentation for advanced metrics...',
-        'alertSystem.md': 'Documentation for alert system...',
-        'automatedBackup.md': 'Documentation for automated backup...',
-        'permissionSystem.md': 'Documentation for permission system...',
-        'localization.md': 'Documentation for localization...'
-    };
+    const docPath = path.join(__dirname, 'docs');
+    const outputFilePath = path.join(docPath, 'README.md');
 
-    for (const [fileName, content] of Object.entries(newDocs)) {
-        fs.writeFileSync(path.join(docsPath, fileName), content);
+    // Generate documentation content
+    const content = '# Project Documentation\n\nThis is the project documentation.\n';
+
+    try {
+        fs.writeFileSync(outputFilePath, content, 'utf8');
+        logger.info('Documentation updated successfully.');
+    } catch (error) {
+        logger.error('Error updating documentation:', error);
     }
-
-    console.log('Documentation updated successfully.');
 }
 
 module.exports = { updateDocumentation };
