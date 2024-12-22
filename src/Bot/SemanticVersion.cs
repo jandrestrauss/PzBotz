@@ -306,6 +306,15 @@ public class SemanticVersion : IComparable
 
         return false;
     }
+
+    public static SemanticVersion Parse(string version)
+    {
+        if (TryParse(version, out var result))
+        {
+            return result;
+        }
+        throw new ArgumentException($"Invalid version format: {version}");
+    }
 }
 /// <summary>
 /// A list of development stages.

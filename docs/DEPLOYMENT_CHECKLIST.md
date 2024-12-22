@@ -16,6 +16,8 @@
 - [x] Run unit tests
 - [x] Run integration tests
 - [x] Conduct end-to-end tests
+- [x] Verify test coverage meets requirements (80% unit, 70% integration)
+- [x] Conduct performance testing
 
 ## Deployment
 
@@ -32,6 +34,9 @@
 - [x] Check application logs
 - [x] Monitor performance metrics
 - [x] Verify alerts are configured
+
+### Pre-Deployment
+- [x] Log detailed performance metrics
 
 ## Post-Deployment
 

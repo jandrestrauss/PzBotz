@@ -188,3 +188,22 @@ npm run test:coverage
 2. Database Connections
 3. File System Operations
 4. Discord API Calls
+
+# Testing
+
+## Test Coverage Requirements
+- Unit tests: 80%
+- Integration tests: 70%
+
+## Running Tests
+```bash
+npm run test:unit        # Unit tests
+npm run test:integration # Integration tests 
+npm run test:e2e         # End-to-end tests
+```
+
+## Performance Testing
+Ensure that performance tests are conducted to monitor memory usage and response times. Use the `MonitorPerformance` method in `PerformanceOptimizationService` to log performance metrics.
+
+## Detailed Performance Metrics Testing
+Ensure that detailed performance metrics are logged, including CPU usage, memory usage, and disk I/O. Use the `LogDetailedPerformanceMetrics` method in `PerformanceOptimizationService` to log these metrics.

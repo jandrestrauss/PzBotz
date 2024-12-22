@@ -11,7 +11,8 @@ using System.Threading.Tasks;
 public static class Application
 {
     public const string                    BotRepoURL = "https://github.com/egebilecen/PZServerDiscordBot";
-    public static readonly SemanticVersion BotVersion = new SemanticVersion(1, 11, 5, DevelopmentStage.Release);
+    public static readonly SemanticVersion BotVersion = new SemanticVersion(1, 11, 7, DevelopmentStage.Release);
+    public static readonly string Version = "v1.11.7";
     public static Settings.BotSettings     BotSettings;
 
     public static DiscordSocketClient  Client;
@@ -99,6 +100,15 @@ public static class Application
     #if !DEBUG
         ServerUtility.ServerProcess = ServerUtility.Commands.StartServer();
     #endif
+
+        var performanceService = new PerformanceOptimizationService(_logger, _transactionRepo, _cache);
+        performanceService.ClearCache();
+        await performanceService.LogNetworkUsage();
+        await performanceService.LogDatabaseQueryPerformance();
+        performanceService.LogApplicationUptime();
+        performanceService.LogCacheStatistics();
+        performanceService.LogThreadCount();
+        performanceService.LogGarbageCollectionStatistics();
 
         Client   = new DiscordSocketClient(new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
         Commands = new CommandService();
