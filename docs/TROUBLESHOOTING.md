@@ -64,6 +64,20 @@
    - Check indexes
    - Monitor connection pool
 
+## New Scenarios
+
+### WebSocket Connection Issues
+- **Problem**: WebSocket connection is unstable.
+- **Solution**: Ensure the WebSocket server is running and check network stability.
+
+### API Rate Limiting
+- **Problem**: API requests are being rate limited.
+- **Solution**: Reduce the frequency of API requests or increase the rate limit in the configuration.
+
+### Error Handling
+- **Problem**: Errors are not being handled properly.
+- **Solution**: Review the error handling logic and ensure all edge cases are covered.
+
 ## Error Codes Reference
 
 | Code | Description | Solution |
