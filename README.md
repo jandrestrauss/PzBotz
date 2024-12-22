@@ -398,3 +398,110 @@ For issues and feature requests, please create an issue on GitHub.
 
 ## License
 MIT License - See LICENSE file for details
+
+# PZBotV - Payment Integration Bot
+
+## Overview
+PZBotV is a Discord bot designed to handle payment processing, points management, and transaction tracking for a gaming community. It integrates with multiple payment providers and offers a comprehensive set of features for both users and administrators.
+
+## Features
+- **Shop Command System**: Users can purchase points packages.
+- **Points Package Management**: Manage points packages.
+- **Payment Flow UI**: User interface for payment processing.
+- **Discord Commands Integration**: Payment commands integrated with Discord.
+- **Transaction History**: Track user transactions.
+- **User Payment Summary**: View payment summaries.
+- **Admin Dashboard**: Manage payments and view statistics.
+- **Payment Statistics**: View payment system performance.
+- **Refund System**: Process refunds.
+- **Analytics Dashboard**: Real-time analytics.
+- **Performance Monitoring**: Monitor performance and metrics.
+- **Caching Layer**: Improved performance with caching.
+- **Load Balancing**: Distribute payment requests across providers.
+- **Provider Health Monitoring**: Monitor health of payment providers.
+- **Failover Mechanism**: Handle provider failures.
+- **Weighted Routing**: Load balancing with weighted routing.
+- **System Architecture Documentation**: Detailed system architecture.
+- **Deployment Guide**: Guide for deploying the system.
+- **Troubleshooting Guide**: Guide for troubleshooting common issues.
+- **User Guide**: Guide for payment features.
+- **Admin Guide**: Guide for managing payments.
+
+## Getting Started
+
+### Prerequisites
+- **OS**: Windows Server 2019/2022 or Ubuntu 20.04 LTS
+- **RAM**: 4GB minimum
+- **CPU**: 2 cores minimum
+- **Disk**: 20GB free space
+- **Node.js**: v14.x or later
+- **PostgreSQL**: v12.x or later
+- **Redis**: v6.x or later
+- **NGINX**: v1.18.x or later
+
+### Installation
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-repo/PZBotV.git
+    cd PZBotV
+    ```
+2. Install dependencies:
+    ```bash
+    npm install
+    ```
+3. Configure environment variables:
+    ```env
+    # Database Configuration
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USER=your_db_user
+    DB_PASS=your_db_password
+    DB_NAME=pzbotv
+
+    # Redis Configuration
+    REDIS_HOST=localhost
+    REDIS_PORT=6379
+
+    # Payment Provider Configuration
+    PAYSTACK_SECRET_KEY=sk_test_xxxxx
+    PAYSTACK_PUBLIC_KEY=pk_test_xxxxx
+    PAYGATE_ID=xxxxx
+    PAYGATE_SECRET=xxxxx
+
+    # Discord Configuration
+    DISCORD_TOKEN=your_discord_token
+    ```
+4. Run migrations:
+    ```bash
+    npm run migrate
+    ```
+5. Start the application:
+    ```bash
+    npm start
+    ```
+
+## Documentation
+- [API Specification](docs/API_SPECIFICATION.md)
+- [Payment Setup](docs/PAYMENT_SETUP.md)
+- [Security Guidelines](docs/SECURITY.md)
+- [Error Handling](docs/ERROR_REPORTING.md)
+- [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
+- [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
+- [Troubleshooting Guide](docs/TROUBLESHOOTING_GUIDE.md)
+- [User Guide](docs/USER_GUIDE.md)
+- [Admin Guide](docs/ADMIN_GUIDE.md)
+- [Final Review](docs/FINAL_REVIEW.md)
+- [Release Notes](docs/RELEASE_NOTES.md)
+- [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md)
+- [Final Documentation Review](docs/FINAL_DOCUMENTATION_REVIEW.md)
+
+## Contributing
+Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) for more information.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+- **Support**: support@your-domain.com
+- **Documentation**: [Project Documentation](https://docs.your-domain.com)
+- **Discord**: Join our [support server](https://discord.gg/your-invite-code)
