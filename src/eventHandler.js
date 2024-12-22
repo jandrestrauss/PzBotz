@@ -23,6 +23,14 @@ class EventHandler {
                 zombiesKilled: (stats?.zombiesKilled || 0) + 1
             });
         });
+
+        this.registerHandler('playerStatsUpdate', async (data) => {
+            const stats = await playerStats.getPlayerStats(data.playerId);
+            await playerStats.updateStats(data.playerId, {
+                ...stats,
+                ...data.stats
+            });
+        });
     }
 
     registerHandler(eventName, handler) {

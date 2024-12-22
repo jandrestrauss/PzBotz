@@ -53,8 +53,6 @@ class MonitoringSystem {
 
 module.exports = new MonitoringSystem();
 
-// ...existing code...
-
 function addAdvancedMetricsTracking() {
     // Logic to add advanced metrics tracking
     // ...
@@ -74,5 +72,3 @@ function implementAutomatedBackupSystem() {
 addAdvancedMetricsTracking();
 setupComprehensiveAlertSystem();
 implementAutomatedBackupSystem();
-
-// ...existing code...
