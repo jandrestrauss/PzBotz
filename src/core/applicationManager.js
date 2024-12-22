@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const logger = require('../utils/logger');
 const { PerformanceMonitor } = require('../monitoring/performanceMonitor');
-const ZomboidServer = require('../zomboid/serverManager');
+const ZomboidServer = require('../zomboid/server');
 const DiscordBot = require('../discord/bot');
 const WebSocketManager = require('../websocket/wsManager');
 const DatabaseManager = require('../database/connectionManager');

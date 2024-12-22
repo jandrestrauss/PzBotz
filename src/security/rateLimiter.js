@@ -26,7 +26,7 @@ const rateLimitMiddleware = (req, res, next) => {
 
 const isRateLimited = (ip) => {
   const requests = getRequestsFromIP(ip);
-  return requests > MAX_REQUESTS_PER_MINUTE;
+  return requests > config.MAX_REQUESTS_PER_MINUTE;
 };
 
 module.exports = { limiter, rateLimitMiddleware };

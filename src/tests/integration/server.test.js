@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../app');
-const ZomboidServer = require('../../zomboid/serverManager');
+const ZomboidServer = require('../../zomboid/server');
 const { generateToken } = require('../../auth/authHandler');
 
 describe('Server Management API', () => {

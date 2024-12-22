@@ -81,8 +81,6 @@ npm start
 // ...existing API documentation...
 
 ## Troubleshooting
-// Add troubleshooting guide here
-// Example:
 ### Common Issues
 - **WebSocket Connection Stability**: Ensure the WebSocket server is running and accessible.
 - **Rate Limiting**: If you encounter rate limiting issues, review the rate limiting configuration.

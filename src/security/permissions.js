@@ -18,13 +18,6 @@ const checkPermission = (userRole, action) => {
     return permissions[action].includes(userRole);
 };
 
-const checkPermissions = (user, action) => {
-    // Logic to check user permissions
-    // Example:
-    const userPermissions = getUserPermissions(user);
-    return userPermissions.includes(action);
-};
-
 const permissionMiddleware = (action) => (req, res, next) => {
     if (!req.user || !checkPermission(req.user.role, action)) {
         return res.status(403).json({
@@ -35,4 +28,4 @@ const permissionMiddleware = (action) => (req, res, next) => {
     next();
 };
 
-module.exports = { roles, permissions, checkPermission, checkPermissions, permissionMiddleware };
+module.exports = { roles, permissions, checkPermission, permissionMiddleware };
