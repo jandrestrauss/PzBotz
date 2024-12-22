@@ -3,32 +3,60 @@
 ## Core Configuration
 // ...existing core config sections...
 
-## Payment Configuration
+## Payment System Configuration
 
-### Required Settings
+### Provider Settings
 ```json
 {
   "payment": {
-    "enabled": true,
-    "providers": ["paygate", "paystack"],
+    "activeProviders": ["paystack", "paygate"],
     "defaultProvider": "paystack",
-    "pointsPackages": [
+    "testMode": true,
+    "webhookTimeout": 30000,
+    "maxRetries": 3
+  }
+}
+```
+
+### Points Configuration
+```json
+{
+  "points": {
+    "packages": [
       {
         "id": "basic",
+        "name": "Basic Package",
         "points": 1000,
-        "price": 10.00,
-        "currency": "ZAR"
+        "price": 10.00
       },
       {
         "id": "premium",
+        "name": "Premium Package",
         "points": 5000,
-        "price": 45.00,
-        "currency": "ZAR"
+        "price": 45.00
       }
     ],
-    "webhookSecret": "your_webhook_secret",
-    "successRedirect": "https://your-server.com/success",
-    "failureRedirect": "https://your-server.com/failure"
+    "transferEnabled": true,
+    "minTransfer": 100,
+    "maxTransfer": 10000
+  }
+}
+```
+
+### Notification Settings
+```json
+{
+  "notifications": {
+    "paymentSuccess": {
+      "discord": true,
+      "email": false,
+      "inGame": true
+    },
+    "paymentFailed": {
+      "discord": true,
+      "email": true,
+      "inGame": false
+    }
   }
 }
 ```
@@ -47,3 +75,46 @@ PAYSTACK_WEBHOOK_SECRET=whsec_xxxxx
 # PayGate Configuration
 PAYGATE_ID=xxxxx
 PAYGATE_SECRET=xxxxx
+```
+
+## Analytics Configuration
+
+### Tracking Settings
+```json
+{
+  "analytics": {
+    "enabled": true,
+    "providers": ["internal", "discord"],
+    "tracking": {
+      "transactions": true,
+      "userBehavior": true,
+      "errorRates": true
+    },
+    "reporting": {
+      "dailySummary": true,
+      "weeklyReport": true,
+      "monthlyAnalysis": true
+    }
+  }
+}
+```
+
+### Metric Collection
+```json
+{
+  "metrics": {
+    "sampling": {
+      "interval": 300,
+      "retention": {
+        "raw": "7d",
+        "aggregated": "90d"
+      }
+    },
+    "alerting": {
+      "errorRate": 5,
+      "responseTime": 2000,
+      "failureThreshold": 3
+    }
+  }
+}
+```

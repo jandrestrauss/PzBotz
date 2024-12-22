@@ -42,3 +42,4 @@ const REQUIRED_ROLES = {
     TXN_VIEWER: ['Administrator', 'Support Staff'],
     SUPPORT: ['Support Staff']
 };
+```

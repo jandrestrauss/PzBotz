@@ -34,6 +34,43 @@ const POINT_CONVERSION = {
 };
 ```
 
+## Transaction Processing
+
+### Queue Management
+```typescript
+interface QueueConfig {
+    maxSize: 1000,
+    processingTimeout: 30000,
+    retryStrategy: {
+        attempts: 3,
+        backoff: 'exponential',
+        initialDelay: 1000
+    }
+}
+```
+
+### Transaction Lifecycle
+```mermaid
+stateDiagram-v2
+    [*] --> Initiated
+    Initiated --> Processing
+    Processing --> Verifying
+    Verifying --> Complete
+    Verifying --> Failed
+    Failed --> Retrying
+    Retrying --> Processing
+    Complete --> [*]
+```
+
+### Deadlock Prevention
+```javascript
+const DEADLOCK_CONFIG = {
+    lockTimeout: 30000,
+    maxLockAttempts: 3,
+    releaseStrategy: 'force_after_timeout'
+};
+```
+
 ## Transaction Recovery
 
 ### Auto-Recovery

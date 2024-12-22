@@ -24,6 +24,44 @@ const SECURITY_CONFIG = {
 };
 ```
 
+## Implementation Details
+
+### Signature Verification
+```csharp
+public class SignatureVerifier
+{
+    private readonly string secretKey;
+    private const string HASH_ALGORITHM = "HMACSHA512";
+    
+    public bool VerifySignature(string payload, string signature)
+    {
+        // Implementation details available in WebhookHandler.cs
+    }
+}
+```
+
+### Event Processing
+```typescript
+interface WebhookProcessor {
+    validateEvent: (event: PaymentEvent) => Promise<boolean>;
+    processEvent: (event: PaymentEvent) => Promise<void>;
+    handleError: (error: Error) => Promise<void>;
+}
+```
+
+### Security Measures
+```javascript
+const WEBHOOK_SECURITY = {
+    rateLimiting: {
+        maxRequests: 100,
+        windowMs: 60000
+    },
+    ipFiltering: true,
+    signatureRequired: true,
+    timeoutMs: 10000
+};
+```
+
 ## Event Types
 
 ### Transaction Events

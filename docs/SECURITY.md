@@ -70,6 +70,42 @@
 }
 ```
 
+```typescript
+interface SecurityConfig {
+    encryption: {
+        algorithm: 'AES-256-GCM',
+        keyRotationDays: 30,
+        saltRounds: 10
+    },
+    validation: {
+        maxRetries: 3,
+        lockoutMinutes: 15,
+        requireVerification: true
+    },
+    monitoring: {
+        rateLimit: 10,
+        suspiciousAmount: 5000,
+        requireApproval: true
+    }
+}
+```
+
+### Access Control
+```typescript
+const PAYMENT_ROLES = {
+    ADMIN: ['MANAGE_PAYMENTS', 'VIEW_TRANSACTIONS', 'PROCESS_REFUNDS'],
+    SUPPORT: ['VIEW_TRANSACTIONS', 'PROCESS_REFUNDS'],
+    USER: ['CREATE_TRANSACTION', 'VIEW_OWN_TRANSACTIONS']
+};
+```
+
+### Audit Requirements
+1. All payment attempts
+2. Administrative actions
+3. Points modifications
+4. Security events
+5. API access logs
+
 ### Security Measures
 - Request Signing
 - IP Whitelisting

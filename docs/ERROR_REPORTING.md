@@ -57,6 +57,44 @@ const TRANSACTION_ERRORS = {
 };
 ```
 
+## API Errors
+
+### HTTP Status Codes
+```typescript
+const API_ERRORS = {
+    400: 'Invalid request parameters',
+    401: 'Authentication failed',
+    403: 'Permission denied',
+    404: 'Resource not found',
+    409: 'Transaction conflict',
+    422: 'Validation failed',
+    500: 'Internal server error'
+};
+```
+
+### Error Logging
+```typescript
+interface APIErrorLog {
+    timestamp: Date;
+    endpoint: string;
+    statusCode: number;
+    errorCode: string;
+    message: string;
+    requestId: string;
+    userId?: string;
+}
+```
+
+### Recovery Actions
+```javascript
+const ERROR_ACTIONS = {
+    INVALID_AMOUNT: 'Notify user to check amount',
+    CARD_DECLINED: 'Suggest alternative payment method',
+    NETWORK_ERROR: 'Automatic retry with backoff',
+    WEBHOOK_FAILED: 'Queue for retry and alert admin'
+};
+```
+
 ## Alert Channels
 
 ### Discord Notifications
