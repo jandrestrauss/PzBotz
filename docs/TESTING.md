@@ -49,10 +49,17 @@ describe('API Integration', () => {
 
 ## Payment Integration Tests
 
-### Paystack Test Environment
-- Environment: `Test Mode`
-- Status: `Active`
-- API Access: `Enabled`
+### Test Environment Setup
+```bash
+# Install test dependencies
+npm install -g ngrok jest newman
+
+# Start local test server
+npm run test:server
+
+# Start ngrok tunnel
+ngrok http 3000
+```
 
 ### Test Cards
 ```
@@ -77,7 +84,81 @@ OTP: 222666
 3. Configure webhook URL in Paystack dashboard
 4. Test endpoint: `curl -X POST http://localhost:3000/webhook/paystack`
 
+### Automated Test Suites
+
+#### Unit Tests
+```bash
+# Run all unit tests
+npm run test:unit
+
+# Run payment specific tests
+npm run test:unit:payment
+
+# Run webhook tests
+npm run test:unit:webhook
+```
+
+#### Integration Tests
+```bash
+# Run API integration tests
+npm run test:integration
+
+# Run payment flow tests
+npm run test:integration:payment
+```
+
+#### End-to-End Tests
+```bash
+# Run full E2E test suite
+npm run test:e2e
+
+# Run payment scenarios
+npm run test:e2e:payment
+```
+
 ### Test Scenarios
+
+#### Payment Processing
+1. Successful Payment
+   - Valid card
+   - Sufficient funds
+   - Valid OTP
+   
+2. Failed Payment
+   - Invalid card
+   - Insufficient funds
+   - Wrong OTP
+   - Network timeout
+
+3. Webhook Processing
+   - Valid signature
+   - Invalid signature
+   - Retry mechanism
+   - Timeout handling
+
+### Test Data
+
+#### Success Scenarios
+```json
+{
+  "card": "4084084084084081",
+  "cvv": "408",
+  "expiry": "12/25",
+  "pin": "0000",
+  "otp": "123456"
+}
+```
+
+#### Failure Scenarios
+```json
+{
+  "invalidCard": "4084084084084082",
+  "wrongOtp": "222666",
+  "invalidPin": "1234"
+}
+```
+
+## Test Scenarios
 1. Successful Payment Flow
 2. Failed Payment
 3. Timeout Handling

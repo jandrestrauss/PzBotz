@@ -2,7 +2,7 @@
 
 ## Payment Processing Errors
 
-### Paystack Error Codes
+### Error Codes
 ```json
 {
   "E001": "Invalid card number",
@@ -14,38 +14,46 @@
 }
 ```
 
-### Error Recovery Strategies
-1. Transaction Verification
+### Recovery Strategies
+
+#### Transaction Verification
 ```javascript
-async function verifyTransaction(reference) {
-  const maxRetries = 3;
-  const backoffDelay = 1000; // 1 second
-  
-  for(let i = 0; i < maxRetries; i++) {
+// Verification with retries
+const maxRetries = 3;
+const backoffDelay = 1000;
+
+// Retry logic implementation
+async function verifyWithRetry(reference) {
+  for(let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await paystackClient.verify(reference);
-    } catch(e) {
-      if(i === maxRetries - 1) throw e;
-      await sleep(backoffDelay * Math.pow(2, i));
+      return await verify(reference);
+    } catch(error) {
+      if(attempt === maxRetries) throw error;
+      await sleep(backoffDelay * Math.pow(2, attempt));
     }
   }
 }
 ```
 
-2. Webhook Retry Logic
+#### Webhook Processing
 ```javascript
-const handleWebhookFailure = async (event) => {
-  await queueForRetry(event, {
-    maxRetries: 3,
-    backoff: 'exponential',
-    initialDelay: 5000
-  });
+// Webhook retry configuration
+const webhookConfig = {
+  maxRetries: 3,
+  backoff: 'exponential',
+  initialDelay: 5000
 };
 ```
 
-### Error Monitoring
-- Log all payment attempts
-- Track success/failure rates
-- Monitor transaction latency
-- Alert on high failure rates
-- Regular error log review
+### Monitoring
+1. Transaction Success Rate
+2. Average Processing Time
+3. Error Frequency
+4. Webhook Reliability
+5. System Availability
+
+### Alerts
+1. High Error Rate Alert
+2. Transaction Timeout Alert
+3. Webhook Failure Alert
+4. System Performance Alert
