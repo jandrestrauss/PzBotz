@@ -1,9 +1,12 @@
 // ...existing code...
 
+const logger = require('../logging/loggingSystem');
+
 const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
+  logger.error(`Error: ${err.message}`, { stack: err.stack });
+  res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
 };
 
-module.exports = { errorHandler };
+// ...existing code...
+
+module.exports = errorHandler;

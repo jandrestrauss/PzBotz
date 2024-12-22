@@ -57,4 +57,29 @@ class AdvancedMetrics {
     }
 }
 
-module.exports = new AdvancedMetrics();
+const collectAdvancedMetrics = () => {
+    // Collect CPU usage
+    const cpuUsage = process.cpuUsage();
+    // Collect memory usage
+    const memoryUsage = process.memoryUsage();
+    // Collect disk usage
+    const diskUsage = getDiskUsage(); // Assume getDiskUsage is a defined function
+
+    // Log metrics
+    console.log('CPU Usage:', cpuUsage);
+    console.log('Memory Usage:', memoryUsage);
+    console.log('Disk Usage:', diskUsage);
+
+    // Check for alerts
+    if (cpuUsage.user > 80) {
+        sendAlert('High CPU usage detected');
+    }
+    if (memoryUsage.heapUsed > memoryUsage.heapTotal * 0.8) {
+        sendAlert('High memory usage detected');
+    }
+    if (diskUsage.used > diskUsage.total * 0.8) {
+        sendAlert('High disk usage detected');
+    }
+};
+
+module.exports = { collectAdvancedMetrics };

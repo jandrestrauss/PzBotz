@@ -1,15 +1,52 @@
 const { Client } = require('pg');
 const logger = require('../utils/logger');
 
+const migrations = [
+  {
+    id: '20231001_create_users_table',
+    up: async (db) => {
+      await db.query(`
+        CREATE TABLE users (
+          id SERIAL PRIMARY KEY,
+          username VARCHAR(255) NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    },
+    down: async (db) => {
+      await db.query(`DROP TABLE users;`);
+    }
+  },
+  {
+    id: '20231002_create_points_table',
+    up: async (db) => {
+      await db.query(`
+        CREATE TABLE points (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id),
+          points INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    },
+    down: async (db) => {
+      await db.query(`DROP TABLE points;`);
+    }
+  },
+  // Add more migrations as needed
+];
+
 async function runMigrations() {
     const client = new Client();
     try {
         await client.connect();
         logger.info('Connected to the database.');
 
-        // Run your migration scripts here
-        // Example:
-        // await client.query('CREATE TABLE IF NOT EXISTS example_table (id SERIAL PRIMARY KEY, name VARCHAR(100));');
+        for (const migration of migrations) {
+            await migration.up(client);
+            logger.info(`Migration ${migration.id} applied successfully.`);
+        }
 
         logger.info('Migrations completed successfully.');
     } catch (error) {
@@ -19,4 +56,4 @@ async function runMigrations() {
     }
 }
 
-module.exports = { runMigrations };
+module.exports = { runMigrations, migrations };

@@ -3,26 +3,26 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'your-email@gmail.com',
-        pass: 'your-email-password'
+        user: process.env.ALERT_EMAIL,
+        pass: process.env.ALERT_PASSWORD
     }
 });
 
-function sendAlert(subject, message) {
+const sendAlert = (message) => {
     const mailOptions = {
-        from: 'your-email@gmail.com',
-        to: 'admin@example.com',
-        subject: subject,
+        from: process.env.ALERT_EMAIL,
+        to: process.env.ADMIN_EMAIL,
+        subject: 'Critical Alert',
         text: message
     };
 
-    transporter.sendMail(mailOptions, function(error, info) {
+    transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-            console.log('Error sending alert email:', error);
+            console.error('Error sending alert email:', error);
         } else {
             console.log('Alert email sent:', info.response);
         }
     });
-}
+};
 
 module.exports = { sendAlert };
