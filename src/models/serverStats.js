@@ -1,36 +1,25 @@
 const { DataTypes } = require('sequelize');
 const database = require('../database');
 
-class ServerStats {
-    constructor() {
-        this.Stats = database.sequelize.define('ServerStats', {
-            timestamp: {
-                type: DataTypes.DATE,
-                defaultValue: DataTypes.NOW
-            },
-            playerCount: DataTypes.INTEGER,
-            cpuUsage: DataTypes.FLOAT,
-            memoryUsage: DataTypes.FLOAT,
-            tickRate: DataTypes.FLOAT
-        });
-    }
+const ServerStats = database.sequelize.define('ServerStats', {
+    timestamp: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    playerCount: DataTypes.INTEGER,
+    cpuUsage: DataTypes.FLOAT,
+    memoryUsage: DataTypes.FLOAT,
+    tickRate: DataTypes.FLOAT
+});
 
-    async logStats(stats) {
-        try {
-            await this.Stats.create(stats);
-        } catch (error) {
-            logger.error('Failed to log server stats:', error);
-        }
-    }
+ServerStats.getOverviewStats = async function() {
+    const currentStats = await this.findOne({ order: [['timestamp', 'DESC']] });
+    const historicalStats = await this.findAll({ limit: 100, order: [['timestamp', 'DESC']] });
+    return { current: currentStats, historical: historicalStats };
+};
 
-    async getOverviewStats() {
-        const currentStats = await this.getCurrentStats();
-        const historicalStats = await this.getHistoricalStats();
-        return {
-            current: currentStats,
-            historical: historicalStats
-        };
-    }
-}
+ServerStats.getCurrentStats = async function() {
+    return await this.findOne({ order: [['timestamp', 'DESC']] });
+};
 
-module.exports = new ServerStats();
+module.exports = ServerStats;

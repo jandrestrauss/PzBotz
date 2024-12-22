@@ -17,10 +17,29 @@ router.get('/overview', async (req, res) => {
 
 router.get('/players', async (req, res) => {
     try {
-        const players = await playerStats.getAllPlayersStats();
+        const players = await playerStats.findAll();
         res.render('dashboard/players', { players });
     } catch (error) {
         res.status(500).render('error', { error });
+    }
+});
+
+router.get('/status', async (req, res) => {
+    try {
+        const status = await serverStats.getCurrentStats();
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get server status' });
+    }
+});
+
+router.get('/players/:id/stats', async (req, res) => {
+    try {
+        const stats = await playerStats.findByPk(req.params.id);
+        if (!stats) return res.status(404).json({ error: 'Player not found' });
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get player stats' });
     }
 });
 
