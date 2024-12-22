@@ -48,6 +48,7 @@ DISCORD_TOKEN=your_bot_token
 ZOMBOID_SERVER_PATH=path_to_server
 ADMIN_PASSWORD=your_admin_password
 RCON_PASSWORD=your_rcon_password
+REDIS_URL=your_redis_url
 ```
 
 ## Usage Guide
@@ -57,28 +58,51 @@ npm start
 ```
 
 ### Using the UI
-1. Server Control Tab
+1. **Server Control Tab**
    - Start/Stop server
    - View console output
    - Monitor performance
 
-2. Discord Bot Tab
+2. **Discord Bot Tab**
    - Manage bot settings
    - View command usage
    - Configure permissions
 
-3. Mod Manager Tab
+3. **Mod Manager Tab**
    - Install/Update mods
    - Configure load order
    - Check compatibility
 
-4. Backup Manager Tab
+4. **Backup Manager Tab**
    - Create/Restore backups
    - Configure backup schedule
    - Manage backup storage
 
+5. **Settings Tab**
+   - Update server settings
+   - Manage admin credentials
+   - Configure RCON settings
+
+6. **Logs Tab**
+   - View system logs
+   - Filter logs by type
+   - Export logs
+
 ## API Documentation
-// ...existing API documentation...
+### Endpoints
+- **GET /api/server/status**: Get the current server status.
+- **POST /api/server/start**: Start the server.
+- **POST /api/server/stop**: Stop the server.
+- **POST /api/server/restart**: Restart the server.
+- **GET /api/discord/commands**: Get the list of available Discord commands.
+- **POST /api/discord/command**: Execute a Discord command.
+- **GET /api/mods**: Get the list of installed mods.
+- **POST /api/mods/install**: Install a new mod.
+- **POST /api/mods/update**: Update an existing mod.
+- **GET /api/backups**: Get the list of backups.
+- **POST /api/backups/create**: Create a new backup.
+- **POST /api/backups/restore**: Restore a backup.
+- **GET /api/logs**: Get the system logs.
 
 ## Troubleshooting
 ### Common Issues

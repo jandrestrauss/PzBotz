@@ -31,6 +31,15 @@ class ZomboidServer extends EventEmitter {
         this.emit('status', this.status);
     }
 
+    async shutdown() {
+        if (this.process) {
+            this.process.kill();
+            this.status = 'stopped';
+            this.emit('status', this.status);
+            logger.info('Server stopped successfully');
+        }
+    }
+
     setupProcessHandlers() {
         this.process.stdout.on('data', (data) => {
             this.handleServerOutput(data.toString());
@@ -56,7 +65,7 @@ class ZomboidServer extends EventEmitter {
 
     async restart() {
         if (this.status === 'running') {
-            await this.stop();
+            await this.shutdown();
         }
         await this.start();
     }

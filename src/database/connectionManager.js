@@ -28,6 +28,14 @@ class DatabaseManager {
         }
     }
 
+    async shutdown() {
+        if (this.isConnected) {
+            await mongoose.disconnect();
+            this.isConnected = false;
+            logger.info('Database disconnected successfully');
+        }
+    }
+
     setupConnectionHandlers() {
         mongoose.connection.on('disconnected', () => {
             this.isConnected = false;
@@ -41,6 +49,23 @@ class DatabaseManager {
                 this.reconnect();
             }
         });
+    }
+
+    async reconnect() {
+        if (this.retryAttempts >= this.maxRetries) {
+            logger.error('Max retry attempts reached. Could not reconnect to the database.');
+            return;
+        }
+
+        this.retryAttempts++;
+        logger.info(`Retrying database connection (${this.retryAttempts}/${this.maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+        await this.connect();
+    }
+
+    async handleConnectionError(error) {
+        logger.error('Database connection error:', error);
+        await this.reconnect();
     }
 }
 

@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const logger = require('../utils/logger');
-const { serverMetrics } = require('../monitoring/metrics');
+const { serverMetrics, advancedMetrics } = require('../monitoring/metrics');
 
 class WebSocketManager {
     constructor(server) {
@@ -21,7 +21,14 @@ class WebSocketManager {
         // Broadcast server metrics every 5 seconds
         setInterval(() => {
             this.broadcast('metrics', serverMetrics.getMetrics());
+            this.broadcast('advancedMetrics', advancedMetrics.getMetrics());
         }, 5000);
+    }
+
+    async shutdown() {
+        this.wss.close(() => {
+            logger.info('WebSocket server closed successfully');
+        });
     }
 
     broadcast(type, data) {
@@ -41,6 +48,28 @@ class WebSocketManager {
         } catch (error) {
             logger.logEvent(`WebSocket error: ${error.message}`);
         }
+    }
+
+    handleConnection(ws) {
+        this.clients.add(ws);
+        ws.send(JSON.stringify({ type: 'connection', status: 'connected' }));
+    }
+
+    handleDisconnection(ws) {
+        this.clients.delete(ws);
+    }
+
+    setupHeartbeat(ws) {
+        ws.isAlive = true;
+        ws.on('pong', () => ws.isAlive = true);
+
+        const interval = setInterval(() => {
+            if (ws.isAlive === false) return ws.terminate();
+            ws.isAlive = false;
+            ws.ping();
+        }, 30000);
+
+        ws.on('close', () => clearInterval(interval));
     }
 }
 

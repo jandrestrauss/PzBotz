@@ -23,5 +23,25 @@ describe('Configuration Validation', () => {
             expect(() => validator.validateServerConfig(config))
                 .toThrow(AppError);
         });
+
+        test('Should reject missing server name', () => {
+            const config = {
+                maxPlayers: 32,
+                adminPassword: 'password123'
+            };
+
+            expect(() => validator.validateServerConfig(config))
+                .toThrow(AppError);
+        });
+
+        test('Should reject missing admin password', () => {
+            const config = {
+                serverName: 'Test Server',
+                maxPlayers: 32
+            };
+
+            expect(() => validator.validateServerConfig(config))
+                .toThrow(AppError);
+        });
     });
 });

@@ -1,7 +1,6 @@
-const logger = require('./logger');
 const os = require('os');
 
-class PerformanceMonitor {
+class PerformanceUtil {
     constructor() {
         this.metrics = new Map();
         this.thresholds = {
@@ -43,4 +42,4 @@ class PerformanceMonitor {
     }
 }
 
-module.exports = new PerformanceMonitor();
+module.exports = new PerformanceUtil();

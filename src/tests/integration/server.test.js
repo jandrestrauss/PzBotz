@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../app');
+const app = require('../../App');
 const ZomboidServer = require('../../zomboid/server');
 const { generateToken } = require('../../auth/authHandler');
 
