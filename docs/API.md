@@ -1,6 +1,46 @@
-# API Documentation
+# PZBotV API Documentation
+
+## Endpoints
+
+### Server Status
+```http
+GET /api/status
+```
+Returns current server status including player count, CPU usage, and memory usage.
+
+### Player Statistics
+```http
+GET /api/players/:steamId/stats
+```
+Returns statistics for a specific player.
+
+### Server Management
+```http
+POST /api/server/restart
+Authorization: Bearer <token>
+```
+Schedules a server restart.
 
 ## WebSocket Events
+
+### Subscribe to Updates
+```json
+{
+    "type": "subscribe_stats"
+}
+```
+
+### Receive Updates
+```json
+{
+    "type": "stats_update",
+    "data": {
+        "playerCount": 10,
+        "cpu": 45,
+        "memory": 60
+    }
+}
+```
 
 ### Server Status Updates
 ```javascript

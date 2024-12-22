@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Status</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Server Status</h1>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Players Online</h3>
+                <p id="playerCount"><%= stats.playerCount %></p>
+            </div>
+            <div class="stat-card">
+                <h3>CPU Usage</h3>
+                <p id="cpuUsage"><%= stats.cpu %>%</p>
+            </div>
+            <div class="stat-card">
+                <h3>Memory Usage</h3>
+                <p id="memoryUsage"><%= stats.memory %>%</p>
+            </div>
+            <div class="stat-card">
+                <h3>Uptime</h3>
+                <p id="uptime"><%= Math.floor(stats.uptime / 3600) %> hours</p>
+            </div>
+        </div>
+        <script src="/js/status.js"></script>
+    </div>
+</body>
+</html>

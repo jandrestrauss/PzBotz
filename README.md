@@ -505,3 +505,45 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Support**: support@your-domain.com
 - **Documentation**: [Project Documentation](https://docs.your-domain.com)
 - **Discord**: Join our [support server](https://discord.gg/your-invite-code)
+
+# Project Zomboid Discord Bot
+
+## Features
+- Server monitoring and management
+- Player statistics tracking
+- Points system integration
+- Automated backups
+- Discord command interface
+- Web dashboard
+
+## Installation
+1. Install Node.js 16+ and MySQL
+2. Clone repository
+3. Copy `.env.example` to `.env` and configure
+4. Run `npm install`
+5. Run `install.bat`
+
+## Configuration
+Update `.env` file with:
+- Discord bot token
+- Database credentials
+- Server paths
+- Channel IDs
+
+## Commands
+### General
+- `!status` - Server status
+- `!points` - Check points
+- `!gift` - Gift points
+- `!leaderboard` - View leaderboard
+
+### Admin
+- `!whitelist` - Manage whitelist
+- `!restart` - Schedule restart
+- `!backup` - Create backup
+- `!logs` - View logs
+
+## Maintenance
+- Daily backups at 3 AM
+- Weekly restart on Mondays
+- Automatic monitoring alerts
