@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const { RateLimit } = require('rate-limiter-flexible');
+const { getStats, getUsers, updateUserSettings, getLogs, listBackups, createBackup, sendServerCommand, getLanguages, setLanguage, getFeatures, updateFeature, getOptimizations, runOptimization, getDocs, updateDoc, getAlerts, updateAlert, getRateLimits, updateRateLimit, getDetailedStats } = require('../controllers/apiController');
 
 const rateLimiter = new RateLimit({
     points: 10,
@@ -17,15 +18,7 @@ router.get('/server/status', auth.requireRole('user'), async (req, res) => {
     }
 });
 
-router.post('/server/command', auth.requireRole('admin'), async (req, res) => {
-    try {
-        const { command } = req.body;
-        const result = await req.app.rcon.sendCommand(command);
-        res.json({ success: true, result });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+router.post('/server/command', auth.requireRole('admin'), sendServerCommand);
 
 router.get('/players', auth.requireRole('user'), async (req, res) => {
     try {
@@ -57,13 +50,40 @@ router.post('/mod/update', auth.requireRole('admin'), async (req, res) => {
     }
 });
 
-router.get('/backups', auth.requireRole('admin'), async (req, res) => {
-    try {
-        const backups = await req.app.serverManager.listBackups();
-        res.json(backups);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+router.get('/backups', auth.requireRole('admin'), listBackups);
+router.post('/server/backup', auth.requireRole('admin'), createBackup);
+
+// Localization endpoints
+router.get('/localization/languages', getLanguages);
+router.post('/localization/set', auth.requireRole('admin'), setLanguage);
+
+// Feature enhancements endpoints
+router.get('/features', getFeatures);
+router.post('/features/:id/:action', auth.requireRole('admin'), updateFeature);
+
+// Performance optimization endpoints
+router.get('/optimizations', getOptimizations);
+router.post('/optimizations/:id/run', auth.requireRole('admin'), runOptimization);
+
+// Documentation endpoints
+router.get('/docs', getDocs);
+router.put('/docs/:id', auth.requireRole('admin'), updateDoc);
+
+// Alert system endpoints
+router.get('/alerts', getAlerts);
+router.post('/alerts/:id/:action', auth.requireRole('admin'), updateAlert);
+
+// Rate limiting endpoints
+router.get('/rate-limits', getRateLimits);
+router.put('/rate-limits/:id', auth.requireRole('admin'), updateRateLimit);
+
+// Advanced statistics endpoint
+router.get('/stats/detailed', getDetailedStats);
+
+// API endpoints
+router.get('/stats', getStats);
+router.get('/users', getUsers);
+router.put('/users/:id/settings', updateUserSettings);
+router.get('/logs', getLogs);
 
 module.exports = router;

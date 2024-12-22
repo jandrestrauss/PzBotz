@@ -53,6 +53,14 @@
 - `POST /api/auth/logout` - Logout
 - `GET /api/auth/status` - Get auth status
 
+### User Management
+- `GET /api/users` - List users
+- `PUT /api/users/:id/settings` - Update user settings
+
+### Statistics
+- `GET /api/stats/realtime` - Fetch real-time statistics data
+- `GET /api/stats/detailed` - Fetch detailed statistics data
+
 ## Rate Limits
 - API: 100 requests per 5 minutes
 - Commands: 20 requests per minute
@@ -87,4 +95,3 @@ ws.onmessage = (event) => {
 - Endpoint: `/api/users`
 - Method: GET, POST, PUT, DELETE
 - Description: Manage users in the system.
-```

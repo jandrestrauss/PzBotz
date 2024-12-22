@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth/AuthProvider';
 
-const AdminPanel = () => {
+const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const { user } = useAuth();
 
@@ -21,8 +21,8 @@ const AdminPanel = () => {
     };
 
     return (
-        <div className="admin-panel">
-            <h2>Admin Panel</h2>
+        <div className="user-management">
+            <h2>User Management</h2>
             <div className="users-list">
                 {users.map(user => (
                     <div key={user.id} className="user-card">
@@ -43,4 +43,4 @@ const AdminPanel = () => {
     );
 };
 
-export default AdminPanel;
+export default UserManagement;
