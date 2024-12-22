@@ -75,3 +75,16 @@ ws.onmessage = (event) => {
     // Handle different event types
 };
 ```
+
+## New Features
+
+### Real-time Statistics API
+- Endpoint: `/api/stats/realtime`
+- Method: GET
+- Description: Fetch real-time statistics data.
+
+### User Management API
+- Endpoint: `/api/users`
+- Method: GET, POST, PUT, DELETE
+- Description: Manage users in the system.
+```
