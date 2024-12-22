@@ -3,6 +3,7 @@ const schedule = require('node-schedule');
 const logger = require('../utils/logger');
 const fs = require('fs-extra');
 const path = require('path');
+const archiver = require('archiver');
 
 class ServerManager {
     constructor() {
@@ -44,21 +45,29 @@ class ServerManager {
     }
 
     async createBackup() {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupPath = path.join(this.backupDir, timestamp);
-        
-        await fs.ensureDir(backupPath);
-        await this.broadcastMessage('Creating server backup...');
-        await rcon.sendCommand('save');
-        
-        try {
-            await fs.copy(process.env.PZ_SERVER_PATH, backupPath);
-            logger.info(`Backup created at ${backupPath}`);
-            return backupPath;
-        } catch (error) {
-            logger.error('Backup failed:', error);
-            throw error;
+        const backupDir = path.join(__dirname, '../../backups');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir);
         }
+        const date = new Date().toISOString().split('T')[0];
+        const backupFile = path.join(backupDir, `backup-${date}.zip`);
+        
+        const output = fs.createWriteStream(backupFile);
+        const archive = archiver('zip', {
+            zlib: { level: 9 }
+        });
+
+        output.on('close', () => {
+            logger.info(`Backup created: ${backupFile} (${archive.pointer()} total bytes)`);
+        });
+
+        archive.on('error', (err) => {
+            throw err;
+        });
+
+        archive.pipe(output);
+        archive.directory(path.join(__dirname, '../../server_data'), false);
+        await archive.finalize();
     }
 
     async getServerStatus() {

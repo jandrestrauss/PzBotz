@@ -1,8 +1,8 @@
-const cron = require('node-cron');
+const schedule = require('node-schedule');
 const logger = require('../utils/logger');
-const backup = require('../backup');
+const backup = require('../modules/serverManager');
 const monitoring = require('../monitoring');
-const auditLogger = require('../utils/auditLogger');
+const auditLogger = require('../utils/logger');
 
 class TaskManager {
     constructor() {
@@ -30,17 +30,17 @@ class TaskManager {
             await auditLogger.log('SCHEDULED_RESTART', 'SYSTEM', { type: 'weekly' });
         });
 
+        // Log rotation at midnight
+        this.scheduleTask('logRotation', '0 0 * * *', async () => {
+            await auditLogger.rotateLogs();
+        });
+
         logger.info('Task manager initialized');
     }
 
-    scheduleTask(name, schedule, task) {
-        try {
-            const cronJob = cron.schedule(schedule, task);
-            this.tasks.set(name, cronJob);
-            logger.info(`Scheduled task '${name}' registered`);
-        } catch (error) {
-            logger.error(`Failed to schedule task '${name}':`, error);
-        }
+    scheduleTask(name, cron, task) {
+        const job = schedule.scheduleJob(cron, task);
+        this.tasks.set(name, job);
     }
 }
 

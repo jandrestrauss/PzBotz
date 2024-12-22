@@ -5,12 +5,14 @@ const { Server } = require('socket.io');
 const DashboardMonitor = require('./DashboardMonitor');
 const { ServerController } = require('./ServerController');
 const helmet = require('helmet');
-const rateLimit = require('express-Srate-limit');
+const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const RedisStore = require('connect-redis').default;
 const cors = require('cors');
 const logger = require('../utils/logger');
+const userManagement = require('../modules/userManagement');
+const notifications = require('../modules/notifications');
 
 /**
  * Dashboard management system for Project Zomboid server
@@ -361,6 +363,23 @@ class Dashboard {
             next();
         };
 
+        const requireRole = (role) => {
+            return (req, res, next) => {
+                if (!req.session.user || req.session.user.role !== role) {
+                    return res.status(403).json({ error: 'Forbidden' });
+                }
+                next();
+            };
+        };
+
+        const apiLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // limit each IP to 100 requests per windowMs
+            handler: (req, res) => {
+                res.status(429).json({ error: 'Too many requests, please try again later.' });
+            }
+        });
+
         // Auth routes
         this.app.get('/login', (req, res) => {
             res.render('login', { error: null });
@@ -384,9 +403,9 @@ class Dashboard {
         this.app.get('/dashboard', requireAuth, async (req, res) => {
             try {
                 const [serverStatus, playerCount, metrics] = await Promise.all([
-                    monitor.getStatus(),
-                    monitor.getPlayerCount(),
-                    monitor.getServerMetrics()
+                    this.monitor.getStatus(),
+                    this.monitor.getPlayerCount(),
+                    this.monitor.getServerMetrics()
                 ]);
                 
                 res.render('dashboard', {
@@ -400,16 +419,19 @@ class Dashboard {
                 res.redirect('/login');
             }
         });
+
+        this.setupProtectedRoutes(requireAuth, requireRole);
+        this.setupApiRoutes(requireAuth, requireRole, apiLimiter);
     }
 
-    setupProtectedRoutes(requireAuth) {
+    setupProtectedRoutes(requireAuth, requireRole) {
         // Dashboard home
         this.app.get('/dashboard', requireAuth, async (req, res) => {
             try {
                 const [serverStatus, playerCount, metrics] = await Promise.all([
-                    monitor.getStatus(),
-                    monitor.getPlayerCount(),
-                    monitor.getServerMetrics()
+                    this.monitor.getStatus(),
+                    this.monitor.getPlayerCount(),
+                    this.monitor.getServerMetrics()
                 ]);
                 
                 res.render('dashboard', {
@@ -428,9 +450,9 @@ class Dashboard {
         this.app.get('/players', requireAuth, async (req, res) => {
             try {
                 const [players, banned, whitelist] = await Promise.all([
-                    monitor.getActivePlayerStats(),
-                    monitor.getBannedPlayers(),
-                    monitor.getWhitelist()
+                    this.monitor.getActivePlayerStats(),
+                    this.monitor.getBannedPlayers(),
+                    this.monitor.getWhitelist()
                 ]);
                 
                 res.render('players', {
@@ -449,8 +471,8 @@ class Dashboard {
         this.app.get('/controls', requireAuth, async (req, res) => {
             try {
                 const [config, backups] = await Promise.all([
-                    monitor.getServerConfig(),
-                    monitor.getBackupStatus()
+                    this.monitor.getServerConfig(),
+                    this.monitor.getBackupStatus()
                 ]);
 
                 res.render('controls', {
@@ -468,7 +490,7 @@ class Dashboard {
         this.app.post('/controls/action', requireAuth, async (req, res) => {
             try {
                 const { action, params } = req.body;
-                const result = await monitor.executeServerAction(action, params);
+                const result = await this.monitor.executeServerAction(action, params);
                 
                 // Log the action
                 logger.info('Server action executed:', {
@@ -487,7 +509,7 @@ class Dashboard {
         // Backup management
         this.app.post('/controls/backup', requireAuth, async (req, res) => {
             try {
-                const backup = await monitor.createBackup();
+                const backup = await this.monitor.createBackup();
                 res.json({ success: true, backup });
             } catch (error) {
                 logger.error('Backup failed:', error);
@@ -496,11 +518,11 @@ class Dashboard {
         });
     }
 
-    setupApiRoutes(requireAuth) {
-        const serverController = new ServerController(monitor);
+    setupApiRoutes(requireAuth, requireRole, apiLimiter) {
+        const serverController = new ServerController(this.monitor);
 
         // API endpoints
-        this.app.get('/api/server/status', requireAuth, async (req, res) => {
+        this.app.get('/api/server/status', requireAuth, apiLimiter, async (req, res) => {
             try {
                 const status = await serverController.getServerStatus();
                 res.json(status);
@@ -509,7 +531,7 @@ class Dashboard {
             }
         });
 
-        this.app.post('/api/server.control', requireAuth, async (req, res) => {
+        this.app.post('/api/server/control', requireAuth, apiLimiter, async (req, res) => {
             try {
                 const { action, params } = req.body;
                 const result = await serverController.executeAction(action, params);
@@ -518,6 +540,70 @@ class Dashboard {
                 res.status(500).json({ error: error.message });
             }
         });
+
+        this.app.post('/api/users', requireAuth, requireRole('admin'), apiLimiter, async (req, res) => {
+            try {
+                const { username, password, role } = req.body;
+                const user = await userManagement.createUser(username, password, role);
+                res.json({ success: true, user });
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.get('/api/users', requireAuth, requireRole('admin'), apiLimiter, async (req, res) => {
+            try {
+                const users = await userManagement.getUsers();
+                res.json(users);
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.put('/api/users/:id', requireAuth, requireRole('admin'), apiLimiter, async (req, res) => {
+            try {
+                const updates = req.body;
+                const user = await userManagement.updateUser(req.params.id, updates);
+                res.json({ success: true, user });
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.delete('/api/users/:id', requireAuth, requireRole('admin'), apiLimiter, async (req, res) => {
+            try {
+                await userManagement.deleteUser(req.params.id);
+                res.json({ success: true });
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        this.app.post('/api/notifications/alert', requireAuth, requireRole('admin'), apiLimiter, async (req, res) => {
+            try {
+                const { message } = req.body;
+                await notifications.sendAlert(message);
+                res.json({ success: true });
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+    }
+
+    async createUser(req, res) {
+        // Logic to create a user
+    }
+
+    async getUsers(req, res) {
+        // Logic to get users
+    }
+
+    async updateUser(req, res) {
+        // Logic to update a user
+    }
+
+    async deleteUser(req, res) {
+        // Logic to delete a user
     }
 
     setupWebSocket() {
@@ -543,7 +629,7 @@ class Dashboard {
 
     startMonitoring() {
         setInterval(async () => {
-            const serverStats = await monitor.getServerMetrics();
+            const serverStats = await this.monitor.getServerMetrics();
             this.io.to('server').emit('server_update', serverStats);
         }, 30000);
     }

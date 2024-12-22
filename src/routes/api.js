@@ -3,6 +3,11 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { RateLimit } = require('rate-limiter-flexible');
 const { getStats, getUsers, updateUserSettings, getLogs, listBackups, createBackup, sendServerCommand, getLanguages, setLanguage, getFeatures, updateFeature, getOptimizations, runOptimization, getDocs, updateDoc, getAlerts, updateAlert, getRateLimits, updateRateLimit, getDetailedStats } = require('../controllers/apiController');
+const { permissionMiddleware } = require('../security/permissions');
+const metrics = require('../monitoring/metrics');
+const { AppError } = require('../utils/errorHandler');
+const analyticsDashboard = require('../dashboard/analyticsManager');
+const securityManager = require('../security/securityEnhancements');
 
 const rateLimiter = new RateLimit({
     points: 10,
@@ -85,5 +90,44 @@ router.get('/stats', getStats);
 router.get('/users', getUsers);
 router.put('/users/:id/settings', updateUserSettings);
 router.get('/logs', getLogs);
+
+// New API routes
+router.get('/status', async (req, res) => {
+    const status = await getServerStatus();
+    metrics.requestCounter.inc({ method: 'GET', path: '/status' });
+    res.json(status);
+});
+
+router.post('/server/control', 
+    permissionMiddleware('SERVER_CONTROL'),
+    async (req, res) => {
+        const { action } = req.body;
+        const result = await handleServerAction(action);
+        res.json(result);
+    }
+);
+
+router.get('/metrics',
+    permissionMiddleware('VIEW_STATS'),
+    async (req, res) => {
+        const serverMetrics = await metrics.getMetrics();
+        res.json(serverMetrics);
+    }
+);
+
+// Add new routes for analytics and optimization
+router.get('/analytics', 
+    permissionMiddleware('VIEW_STATS'),
+    (req, res) => {
+        res.json(analyticsDashboard.getAnalytics());
+    }
+);
+
+router.get('/performance', 
+    permissionMiddleware('SERVER_CONTROL'),
+    (req, res) => {
+        res.json(performanceOptimizer.getCurrentMetrics());
+    }
+);
 
 module.exports = router;

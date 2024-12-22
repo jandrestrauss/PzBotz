@@ -53,3 +53,71 @@ const App = () => {
 };
 
 export default App;
+
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const isDev = require('electron-is-dev');
+const ApplicationManager = require('./core/applicationManager');
+const SettingsManager = require('./config/settingsManager');
+const BackupManager = require('./backup/backupManager');
+const logger = require('./utils/logger');
+
+require('dotenv').config();
+
+class PZBotzApp {
+    constructor() {
+        this.mainWindow = null;
+        this.setupAppEvents();
+    }
+
+    setupAppEvents() {
+        app.on('ready', async () => {
+            await this.initializeApp();
+            this.createMainWindow();
+        });
+
+        app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') {
+                app.quit();
+            }
+        });
+
+        app.on('before-quit', async () => {
+            await ApplicationManager.shutdown();
+        });
+    }
+
+    async initializeApp() {
+        try {
+            await SettingsManager.loadSettings();
+            await ApplicationManager.initialize();
+            BackupManager.scheduleBackup();
+        } catch (error) {
+            logger.error('Failed to initialize application:', error);
+            app.quit();
+        }
+    }
+
+    createMainWindow() {
+        this.mainWindow = new BrowserWindow({
+            width: 1200,
+            height: 800,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+
+        this.mainWindow.loadURL(
+            isDev 
+                ? 'http://localhost:3000' 
+                : `file://${path.join(__dirname, '../build/index.html')}`
+        );
+
+        if (isDev) {
+            this.mainWindow.webContents.openDevTools();
+        }
+    }
+}
+
+new PZBotzApp();

@@ -14,13 +14,21 @@ class Database {
         this.migrations = new Map();
     }
 
+    async loadMigrations() {
+        const migrationFiles = await fs.readdir(path.join(__dirname, 'models/migrations'));
+        for (const file of migrationFiles) {
+            const migration = require(path.join(__dirname, 'models/migrations', file));
+            this.migrations.set(migration.version, migration);
+        }
+    }
+
     async completeMigrationSystem() {
         try {
             // Load all migration files
-            const migrations = await this.loadMigrations();
+            await this.loadMigrations();
             
             // Sort migrations by version
-            const sortedMigrations = [...migrations.values()]
+            const sortedMigrations = [...this.migrations.values()]
                 .sort((a, b) => a.version - b.version);
 
             // Run pending migrations
@@ -48,7 +56,7 @@ class Database {
     async runMigration(migration) {
         const transaction = await this.sequelize.transaction();
         try {
-            await migration.up(this.sequelize.queryInterface);
+            await migration.up(this.sequelize.getQueryInterface());
             await this.sequelize.query(
                 'INSERT INTO migrations (version, name) VALUES (?, ?)',
                 {
@@ -78,6 +86,8 @@ function implementQueryOptimizations() {
 }
 
 // Call these functions during your database initialization
-completeMigrationSystem();
-optimizeDataPersistenceLayer();
-implementQueryOptimizations();
+(async () => {
+    await module.exports.completeMigrationSystem();
+    optimizeDataPersistenceLayer();
+    implementQueryOptimizations();
+})();

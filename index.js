@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const { runMigrations } = require('./src/database/migrations');
+const { updateDocumentation } = require('./src/documentation/documentation');
 
 const directoryPath = path.join(__dirname);
 const outputFilePath = path.join(__dirname, 'INDEX.md');
@@ -85,13 +87,18 @@ async function readServerConsole() {
     }
 }
 
-// Start reading from server console when bot initializes
-readServerConsole();
+async function initializeApp() {
+    await runMigrations();
+    updateDocumentation();
+    readServerConsole();
 
-// Add this to your existing intervals
-setInterval(() => {
-    if (!isServerRunning()) {
-        console.log('Server not running, attempting to reconnect console...');
-        readServerConsole();
-    }
-}, 60 * 1000); // Check connection every minute
+    // Add this to your existing intervals
+    setInterval(() => {
+        if (!isServerRunning()) {
+            console.log('Server not running, attempting to reconnect console...');
+            readServerConsole();
+        }
+    }, 60 * 1000); // Check connection every minute
+}
+
+initializeApp();

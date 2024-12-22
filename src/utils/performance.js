@@ -1,47 +1,45 @@
 const logger = require('./logger');
+const os = require('os');
 
 class PerformanceMonitor {
     constructor() {
         this.metrics = new Map();
         this.thresholds = {
-            commandResponse: 1000, // 1 second
-            databaseQuery: 500,    // 500ms
-            apiResponse: 2000      // 2 seconds
+            memory: process.env.MEMORY_THRESHOLD || 90,
+            cpu: process.env.CPU_THRESHOLD || 80
         };
     }
 
-    startTimer(operation) {
-        const start = process.hrtime();
+    startMonitoring(service) {
+        const startTime = process.hrtime();
         return () => {
-            const [seconds, nanoseconds] = process.hrtime(start);
+            const [seconds, nanoseconds] = process.hrtime(startTime);
             const duration = seconds * 1000 + nanoseconds / 1e6;
-            this.recordMetric(operation, duration);
+            this.recordMetric(service, duration);
             return duration;
         };
     }
 
-    recordMetric(operation, duration) {
-        if (!this.metrics.has(operation)) {
-            this.metrics.set(operation, []);
+    recordMetric(service, duration) {
+        if (!this.metrics.has(service)) {
+            this.metrics.set(service, []);
         }
-        this.metrics.get(operation).push(duration);
+        const metrics = this.metrics.get(service);
+        metrics.push({ timestamp: Date.now(), duration });
 
-        if (duration > this.thresholds[operation]) {
-            logger.warn(`Performance warning: ${operation} took ${duration}ms`);
-        }
+        // Keep only last hour of metrics
+        const hourAgo = Date.now() - 3600000;
+        this.metrics.set(service, 
+            metrics.filter(m => m.timestamp > hourAgo)
+        );
     }
 
-    getMetrics() {
-        const result = {};
-        for (const [operation, durations] of this.metrics) {
-            result[operation] = {
-                average: durations.reduce((a, b) => a + b, 0) / durations.length,
-                max: Math.max(...durations),
-                min: Math.min(...durations),
-                count: durations.length
-            };
-        }
-        return result;
+    getCPUUsage() {
+        return os.loadavg()[0] * 100;
+    }
+
+    getMemoryUsage() {
+        return (os.totalmem() - os.freemem()) / os.totalmem() * 100;
     }
 }
 

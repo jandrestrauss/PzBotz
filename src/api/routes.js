@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const { authenticateRequest } = require('../utils/auth');
 const logger = require('../utils/logger');
 const playerStats = require('../playerStats');
+const systemIntegration = require('../integration/systemIntegration');
+const { permissionMiddleware } = require('../security/permissions');
 
 router.use(authenticateRequest);
 
@@ -87,5 +89,39 @@ router.post('/server/restart', authenticate, async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+router.get('/systems/status', 
+    permissionMiddleware('VIEW_STATS'),
+    async (req, res) => {
+        const statuses = Array.from(systemIntegration.systems.entries())
+            .map(([name, system]) => ({
+                name,
+                status: system.status,
+                lastCheck: system.lastCheck
+            }));
+        res.json(statuses);
+    }
+);
+
+router.post('/systems/:systemName/action',
+    permissionMiddleware('SERVER_CONTROL'),
+    async (req, res) => {
+        const { systemName } = req.params;
+        const { action, params } = req.body;
+        
+        const system = systemIntegration.systems.get(systemName);
+        if (!system) {
+            return res.status(404).json({ error: 'System not found' });
+        }
+
+        try {
+            const result = await system.instance[action](params);
+            res.json({ success: true, result });
+        } catch (error) {
+            logger.error(`Action failed for ${systemName}:`, error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+);
 
 module.exports = router;

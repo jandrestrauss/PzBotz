@@ -1,5 +1,6 @@
 const os = require('os');
 const logger = require('./utils/logger');
+const notifications = require('./modules/notifications');
 
 class MonitoringSystem {
     constructor() {
@@ -43,32 +44,44 @@ class MonitoringSystem {
 
     checkThresholds() {
         if (this.metrics.cpu > this.alertThresholds.cpuHigh) {
-            logger.warn(`High CPU usage: ${this.metrics.cpu}%`);
+            const message = `High CPU usage: ${this.metrics.cpu}%`;
+            logger.warn(message);
+            notifications.sendAlert(message);
         }
         if (this.metrics.memory > this.alertThresholds.memoryHigh) {
-            logger.warn(`High memory usage: ${this.metrics.memory}%`);
+            const message = `High memory usage: ${this.metrics.memory}%`;
+            logger.warn(message);
+            notifications.sendAlert(message);
         }
+    }
+
+    async getServerMetrics() {
+        // Logic to get server metrics
+        return {
+            cpuUsage: 30,
+            memoryUsage: 70,
+            playerCount: 5
+        };
+    }
+
+    async setupAlertSystem() {
+        // Logic to set up alert system
+        setInterval(async () => {
+            const metrics = await this.getServerMetrics();
+            if (metrics.cpuUsage > 80) {
+                this.sendAlert('High CPU usage');
+            }
+            if (metrics.memoryUsage > 90) {
+                this.sendAlert('High memory usage');
+            }
+        }, 60000);
+    }
+
+    sendAlert(message) {
+        // Logic to send alert
+        logger.warn(message);
+        notifications.sendAlert(message);
     }
 }
 
 module.exports = new MonitoringSystem();
-
-function addAdvancedMetricsTracking() {
-    // Logic to add advanced metrics tracking
-    // ...
-}
-
-function setupComprehensiveAlertSystem() {
-    // Logic to set up comprehensive alert system
-    // ...
-}
-
-function implementAutomatedBackupSystem() {
-    // Logic to implement automated backup system
-    // ...
-}
-
-// Call these functions during your monitoring system initialization
-addAdvancedMetricsTracking();
-setupComprehensiveAlertSystem();
-implementAutomatedBackupSystem();
