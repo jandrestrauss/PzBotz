@@ -74,13 +74,18 @@ class ServerMonitor {
     }
 
     connectWebSocket() {
-        this.ws = new WebSocket(`ws://${window.location.host}`);
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.ws = new WebSocket(`${wsProtocol}//${window.location.host}`);
         
         this.ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'serverState') {
                 this.updateDashboard(data.data);
             }
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
         };
 
         this.ws.onclose = () => {

@@ -47,7 +47,7 @@ public class ProductionPreparationService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Production preparation failed: {ex.Message}");
+            _logger.LogError(ex, "Production preparation failed");
         }
     }
 
@@ -69,7 +69,7 @@ public class ProductionPreparationService
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Final preparation steps failed: {ex.Message}");
+            _logger.LogError(ex, "Final preparation steps failed");
         }
     }
 

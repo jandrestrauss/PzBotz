@@ -16,14 +16,34 @@ This bot is written for people to easily manage their Project Zomboid server usi
   * [Public Channel](#public-channel)
   * [Command Channel](#command-channel)
 * [Localization](#localization)
+* [Advanced Features](#advanced-features)
+  * [Shop System](#shop-system)
+  * [Wheel Spins Event System](#wheel-spins-event-system)
+  * [Death Message System](#death-message-system)
+  * [Automated Systems](#automated-systems)
+    * [Backup Scheduling](#backup-scheduling)
+    * [Log Cleanup](#log-cleanup)
+    * [Mod Update Notifications](#mod-update-notifications)
+    * [Player Statistics](#player-statistics)
+* [Advanced Configuration](#advanced-configuration)
+  * [Channel Setup](#channel-setup)
+  * [Automation Settings](#automation-settings)
+  * [Database Configuration](#database-configuration)
+* [Extended Command List](#extended-command-list)
+  * [Shop Commands](#shop-commands)
+  * [Event Commands](#event-commands)
+  * [Admin Commands](#admin-commands)
+* [Troubleshooting](#troubleshooting)
+  * [Common Issues](#common-issues)
+  * [Performance Optimization](#performance-optimization)
+* [API Reference](#api-reference)
+  * [Endpoints](#endpoints)
+  * [Authentication](#authentication)
+* [Security](#security)
+  * [Best Practices](#best-practices)
+  * [Rate Limiting](#rate-limiting)
 
 # Features
-- Automated server restart schedule with in-game and Discord warnings. (Warnings are announced when 1 hour, 30 min, 15 min, 5 min and 1 min left until server restart. Restart interval can be configured with bot commands.)
-![Automated Server Restart Example](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20features/Screenshot_1.png)
-- Automated server restart when a mod (workshop item) update has been detected.
-![Automated Workshop Item Update Server Restart](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20features/Screenshot_4.png)
-- Executing server commands through bot commands. (For example; saving server, kicking player, teleporting player, starting/stopping rain, making admin and so on. Full list will be at the bottom and will be listed under available commands.)
-![Server Commands Example](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20features/Screenshot_3.png)
 - Auto server start if server quits. This feature is useful if combined with mods that quit the server for whatever reason. For example, if you are using a mod that checks mod updates and when detects it, quits the server. With enabling this feature, you won't need to manually run the server. <br>
 ![Auto Server Start Example](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20features/Screenshot_5.png)
 - `!get_ram_cpu` command for checking current RAM and CPU usage of the machine.
@@ -92,7 +112,8 @@ This bot is written for people to easily manage their Project Zomboid server usi
 - **Note:** The bot currently only supports English.
 
 # Installation
-#### Creating the Discord Bot
+
+## Creating the Discord Bot
 1. Go to [Applications](https://discord.com/developers/applications) section of Discord developer portal. (Be sure to login first.)
 2. Click the `New Application` button on the top right corner of the screen.
 ![Creating a New Application](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20creation/Screenshot_1.png)
@@ -111,7 +132,7 @@ This bot is written for people to easily manage their Project Zomboid server usi
 ![Authorizing the Bot](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20creation/Screenshot_8.png)
 ![Bot Authorized](https://github.com/yourusername/PZBotV/blob/main/.github/images/bot%20creation/Screenshot_9.png)
 
-#### Installing Bot Files
+## Installing Bot Files
 To complete this step and the next step, you must have remote access to your Windows machine.
 1. Navigate to [releases](https://github.com/yourusername/PZBotV/releases) and pick a binary version. I would suggest picking the latest version as it would consist of new features and bug fixes.
 2. Download the `zip` archive.
@@ -119,7 +140,7 @@ To complete this step and the next step, you must have remote access to your Win
 ![Folder Structure](https://github.com/yourusername/PZBotV/blob/main/.github/images/folder_structure.png)
 4. Rename the bat file you were using to start the server as `server.bat`. For example, if you were using `StartServer64.bat`, rename it as `server.bat`.
 
-#### Writing the Discord Bot Token Into File
+## Writing the Discord Bot Token Into File
 1. Create an empty text file in the directory and name it as `bot_token.txt` and open it.
 ![Creating bot_token.txt](https://github.com/yourusername/PZBotV/blob/main/.github/images/setting%20up%20bot%20token/Screenshot_1.png)
 2. Paste the bot token that you saved while creating the discord bot to the first line. (It will look like the picture below.)
@@ -132,7 +153,7 @@ Now all you need to do is run `PZServerDiscordBot.exe`. If you set up everything
 **Note**<br>
 If you have never run the Project Zomboid server before, please run it without using the bot. Because when you run the Project Zomboid server for the first time, it will ask you to set up an admin account. You can't send any key presses to the console if you run the server through the discord bot's exe file. This also means you can't execute server commands directly using the console but I did set up all commands in the discord bot.
 
-#### Warning
+## Warning
 If the bot doesn't respond to any commands, that could mean two things: <br>
 * The bot doesn't have permission to see the channel. Be sure that the bot has full access to the channel which also includes permission to send messages. After confirming the bot has full access but still won't respond, see below.
 * The bot has a missing *intents* configuration. Please head to the [discord developer portal](https://discord.com/developers/applications) (which is the place you created and set up your bot), select your bot, click the `Bot` tab on the left menu and be sure that all bot intentions are enabled under the `Privileged Gateway Intents` section.
@@ -146,13 +167,13 @@ This bot uses 3 different channels to operate. The first channel is the *Public*
 # Bot Commands
 **!help** command can be used in any of the configured 3 channels which the bot will respond with the available command list for *that channel*.
 
-#### Public Channel
+## Public Channel
 - ``!bot_info`` Displays information about this bot. (!bot_info)
 - ``!server_status`` Gets the server status. (!server_status)
 - ``!restart_time`` Gets the next automated restart time. (!restart_time)
 - ``!game_date`` Gets the current in-game date. (!game_date)
 
-#### Command Channel
+## Command Channel
 Bot Commands:
 - `!set_command_channel` Sets the channel for the bot to work in. (!set_command_channel [channel tag])<br>
 - `!set_log_channel` Sets the channel for the bot to work in. (!set_log_channel [channel tag])<br>
@@ -791,7 +812,208 @@ app.on('activate', () => {
 });
 ```
 
+## WebSocket Security
+
+The WebSocket connection is configured to use a secure WebSocket (WSS) protocol:
+
+```javascript
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+this.ws = new WebSocket(`${wsProtocol}//${window.location.host}`);
+```
+
 ## Best Practices
 
 - Always validate and sanitize data passed between processes.
 - Never enable elevated privileges unless absolutely necessary.
+
+## Advanced Features
+
+### Shop System
+- **Commands**:
+  - `!shop` - View available items.
+  - `!buy <item> [quantity]` - Purchase items.
+  - `!balance` - Check current balance.
+- **Item Configuration**:
+  - Configure items in the `shopConfig.json` file.
+  - Set item names, prices, and purchase limits.
+- **Pricing System**:
+  - Define item prices in the configuration file.
+  - Support for different currencies.
+- **Purchase Limits**:
+  - Set daily or weekly purchase limits for items.
+
+### Wheel Spins Event System
+- **Ticket System**:
+  - Users earn tickets through gameplay or purchases.
+  - Tickets are used for wheel spins.
+- **Rewards Configuration**:
+  - Configure rewards in the `rewardsConfig.json` file.
+  - Define reward types and probabilities.
+- **Commands**:
+  - `!spin` - Use tickets for a wheel spin.
+  - `!tickets` - Check ticket balance.
+  - `!rewards` - View possible rewards.
+- **Admin Commands**:
+  - Manage tickets and rewards using admin commands.
+
+### Death Message System
+- **Channel Configuration**:
+  - Set up a dedicated channel for death messages.
+  - Configure in the `botConfig.json` file.
+- **Customizing Messages**:
+  - Define custom death messages.
+  - Use placeholders for player names and causes of death.
+- **Message Formatting**:
+  - Support for rich text formatting.
+  - Include images or emojis in messages.
+
+### Automated Systems
+
+#### Backup Scheduling
+- **Configuration**:
+  - Set backup intervals in the `backupConfig.json` file.
+  - Define backup locations and retention policies.
+- **Commands**:
+  - `!backup_schedule <time>` - Set backup schedule.
+  - `!backup_now` - Perform an immediate backup.
+
+#### Log Cleanup
+- **Settings**:
+  - Configure log retention in the `logConfig.json` file.
+  - Set cleanup schedules and log file locations.
+- **Commands**:
+  - `!cleanup_logs` - Force log cleanup.
+
+#### Mod Update Notifications
+- **Notifications**:
+  - Receive notifications for mod updates.
+  - Configure notification channels in the `modConfig.json` file.
+- **Admin Settings**:
+  - Set notification preferences for admins.
+
+#### Player Statistics
+- **Statistics**:
+  - Track player statistics such as kills, deaths, and playtime.
+  - View stats using commands.
+- **Commands**:
+  - `!stats` - View player statistics.
+  - `!stats_reset` - Reset player statistics.
+
+## Advanced Configuration
+
+### Channel Setup
+- **Command Channel**:
+  - Configure the command channel in the `botConfig.json` file.
+- **Public Channel**:
+  - Set up the public channel for user interactions.
+- **Log Channel**:
+  - Configure the log channel for bot logs.
+- **Death Message Channel**:
+  - Set up the channel for death messages.
+
+### Automation Settings
+- **Backup Schedule**:
+  - Configure backup intervals and retention policies.
+- **Log Cleanup**:
+  - Set log retention and cleanup schedules.
+- **Server Health Checks**:
+  - Configure health check intervals.
+- **Mod Update Checks**:
+  - Set the frequency for mod update checks.
+
+### Database Configuration
+- **Connection String**:
+  - Set up the database connection string in the `databaseConfig.json` file.
+- **Backup Settings**:
+  - Configure database backup settings.
+- **Migration Information**:
+  - Details on database migrations and updates.
+
+## Extended Command List
+
+### Shop Commands
+- `!shop` - View available items.
+- `!buy <item> [quantity]` - Purchase items.
+- `!balance` - Check current balance.
+
+### Event Commands
+- `!spin` - Use tickets for wheel spin.
+- `!tickets` - Check ticket balance.
+- `!rewards` - View possible rewards.
+
+### Admin Commands
+- `!backup_schedule <time>` - Set backup schedule.
+- `!cleanup_logs` - Force log cleanup.
+- `!stats_reset` - Reset player statistics.
+
+## Troubleshooting
+
+### Common Issues
+- **Database Connection**:
+  - Ensure the connection string is correct.
+  - Check database server status.
+- **Backup Failures**:
+  - Verify backup paths and permissions.
+  - Check available disk space.
+- **Rate Limiting**:
+  - Adjust rate limit settings in the `rateLimitConfig.json` file.
+- **Permission Errors**:
+  - Ensure correct role and permission configurations.
+
+### Performance Optimization
+- **Server Resources**:
+  - Monitor CPU and memory usage.
+  - Optimize server settings.
+- **Database Optimization**:
+  - Index frequently queried columns.
+  - Use caching for common queries.
+- **Backup Optimization**:
+  - Schedule backups during low-traffic periods.
+  - Compress backup files.
+- **Log Management**:
+  - Regularly clean up old logs.
+  - Use log rotation.
+
+## API Reference
+
+### Endpoints
+- **Player Statistics**:
+  - `/api/stats` - Get player statistics.
+- **Server Status**:
+  - `/api/status` - Get server status.
+- **Mod Information**:
+  - `/api/mods` - Get mod information.
+- **Backup Status**:
+  - `/api/backup` - Get backup status.
+
+### Authentication
+- **Token Management**:
+  - Generate and manage API tokens.
+- **Permission Levels**:
+  - Define permission levels for API access.
+- **Rate Limiting**:
+  - Configure rate limits for API endpoints.
+
+## Security
+
+### Best Practices
+- **Token Management**:
+  - Keep API tokens secure.
+  - Rotate tokens regularly.
+- **Permission Configuration**:
+  - Assign appropriate permissions to roles.
+  - Regularly review permission settings.
+- **Database Security**:
+  - Use strong passwords for database access.
+  - Enable encryption for sensitive data.
+- **Backup Encryption**:
+  - Encrypt backup files.
+  - Store encryption keys securely.
+
+### Rate Limiting
+- **Configuration Options**:
+  - Set rate limits in the `rateLimitConfig.json` file.
+- **Default Limits**:
+  - Define default rate limits for endpoints.
+- **Override Settings**:
+  - Allow overrides for specific users or roles.

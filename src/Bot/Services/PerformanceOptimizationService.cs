@@ -141,6 +141,29 @@ public class PerformanceOptimizationService
             // Example: Log network usage
             var networkUsage = await GetNetworkUsageAsync();
             _logger.LogInfo($"Current network usage: {networkUsage} bytes/sec");
+            _logger.LogInformation($"Current CPU usage: {cpuUsage}%");
+
+            // Example: Log memory usage
+            var memoryUsage = GC.GetTotalMemory(false);
+            _logger.LogInformation($"Current memory usage: {memoryUsage} bytes");
+
+            // Example: Log disk I/O
+            var diskIo = await GetDiskIoAsync();
+            _logger.LogInformation($"Current disk I/O: {diskIo} bytes/sec");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed to log detailed performance metrics: {ex.Message}");
+        }
+    }
+
+    public async Task LogNetworkUsage()
+    {
+        try
+        {
+            // Example: Log network usage
+            var networkUsage = await GetNetworkUsageAsync();
+            _logger.LogInformation($"Current network usage: {networkUsage} bytes/sec");
         }
         catch (Exception ex)
         {
@@ -154,7 +177,7 @@ public class PerformanceOptimizationService
         {
             // Example: Log database query performance
             var queryPerformance = await GetDatabaseQueryPerformanceAsync();
-            _logger.LogInfo($"Current database query performance: {queryPerformance} ms/query");
+            _logger.LogInformation($"Current database query performance: {queryPerformance} ms/query");
         }
         catch (Exception ex)
         {
@@ -167,7 +190,7 @@ public class PerformanceOptimizationService
         try
         {
             var uptime = DateTime.UtcNow - Application.StartTime;
-            _logger.LogInfo($"Application uptime: {uptime}");
+            _logger.LogInformation($"Application uptime: {uptime}");
         }
         catch (Exception ex)
         {
@@ -180,11 +203,11 @@ public class PerformanceOptimizationService
         try
         {
             var cacheItemCount = _memoryCache.GetCount();
-            _logger.LogInfo($"Current cache item count: {cacheItemCount}");
+            _logger.LogInformation($"Current cache item count: {cacheItemCount}");
 
             // Example: Log cache memory usage
             var cacheMemoryUsage = GC.GetTotalMemory(false);
-            _logger.LogInfo($"Current cache memory usage: {cacheMemoryUsage} bytes");
+            _logger.LogInformation($"Current cache memory usage: {cacheMemoryUsage} bytes");
         }
         catch (Exception ex)
         {
@@ -197,7 +220,7 @@ public class PerformanceOptimizationService
         try
         {
             var threadCount = Process.GetCurrentProcess().Threads.Count;
-            _logger.LogInfo($"Current thread count: {threadCount}");
+            _logger.LogInformation($"Current thread count: {threadCount}");
         }
         catch (Exception ex)
         {
@@ -210,10 +233,10 @@ public class PerformanceOptimizationService
         try
         {
             var gcCollectionCount = GC.CollectionCount(0);
-            _logger.LogInfo($"GC collection count: {gcCollectionCount}");
+            _logger.LogInformation($"GC collection count: {gcCollectionCount}");
 
             var totalMemory = GC.GetTotalMemory(false);
-            _logger.LogInfo($"Total memory: {totalMemory} bytes");
+            _logger.LogInformation($"Total memory: {totalMemory} bytes");
         }
         catch (Exception ex)
         {
