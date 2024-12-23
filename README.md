@@ -761,21 +761,51 @@ The preload script (`preload.js`) safely exposes specific APIs for IPC communica
 ```javascript
 const { contextBridge, ipcRenderer } = require('electron');
 
+const validateData = (data) => {
+  // Add your validation logic here
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid data format');
+  }
+  return true;
+};
+
 contextBridge.exposeInMainWorld('api', {
-  // Expose specific functions with limited scope
-  doSomething: (data) => {
-    return ipcRenderer.invoke('doSomething', data);
+  doSomething: async (data) => {
+    try {
+      return await ipcRenderer.invoke('doSomething', data);
+    } catch (error) {
+      console.error('Error in doSomething:', error);
+      throw error;
+    }
+  },
+  saveData: async (data) => {
+    try {
+      validateData(data);
+      return await ipcRenderer.invoke('saveData', data);
+    } catch (error) {
+      console.error('Error in saveData:', error);
+      throw error;
+    }
+  },
+  loadData: async () => {
+    try {
+      return await ipcRenderer.invoke('loadData');
+    } catch (error) {
+      console.error('Error in loadData:', error);
+      throw error;
+    }
   }
 });
 ```
 
-## Application Lifecycle
+## Main Process Handlers
 
-The application handles its lifecycle properly to ensure resources are managed correctly:
+The main process handles IPC methods for saving and loading data:
 
 ```javascript
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs').promises;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -793,6 +823,15 @@ function createWindow() {
 
   // Load your content
   win.loadFile('index.html');
+
+  // Add window management
+  win.on('closed', () => {
+    // Clean up resources
+  });
+
+  win.on('ready-to-show', () => {
+    win.show();
+  });
 }
 
 // Create window when app is ready
@@ -810,210 +849,192 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+// IPC handlers
+ipcMain.handle('doSomething', async (event, data) => {
+  // Handle the data and return a result
+  return 'Result from main process';
+});
+
+ipcMain.handle('saveData', async (event, data) => {
+  try {
+    // Implement data saving logic
+    await fs.writeFile('data.json', JSON.stringify(data));
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('loadData', async () => {
+  try {
+    const data = await fs.readFile('data.json', 'utf8');
+    return { success: true, data: JSON.parse(data) };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
 ```
 
-## WebSocket Security
+## Renderer Process Interface
 
-The WebSocket connection is configured to use a secure WebSocket (WSS) protocol:
+The renderer process interface handles saving and loading data:
 
 ```javascript
-const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-this.ws = new WebSocket(`${wsProtocol}//${window.location.host}`);
+async function handleSaveData(data) {
+  try {
+    const result = await window.api.saveData(data);
+    if (result.success) {
+      console.log('Data saved successfully');
+    } else {
+      console.error('Failed to save data:', result.error);
+    }
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+}
+
+async function handleLoadData() {
+  try {
+    const result = await window.api.loadData();
+    if (result.success) {
+      return result.data;
+    } else {
+      console.error('Failed to load data:', result.error);
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+}
+
+// Example usage
+document.getElementById('saveButton').addEventListener('click', () => {
+  const data = { key: 'value' }; // Replace with actual data
+  handleSaveData(data);
+});
+
+document.getElementById('loadButton').addEventListener('click', async () => {
+  const data = await handleLoadData();
+  console.log('Loaded data:', data);
+});
 ```
 
-## Best Practices
+## Basic UI Components
 
-- Always validate and sanitize data passed between processes.
-- Never enable elevated privileges unless absolutely necessary.
+Add basic UI components for saving and loading data:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your App</title>
+</head>
+<body>
+    <div id="app">
+        <!-- Add your UI elements here -->
+        <button id="saveButton">Save Data</button>
+        <button id="loadButton">Load Data</button>
+    </div>
+    <script src="./renderer.js"></script>
+</body>
+</html>
+```
+
+## Configuration Management
+
+Add configuration management:
+
+```javascript
+const config = {
+  development: {
+    dataPath: './dev-data/',
+    debug: true
+  },
+  production: {
+    dataPath: './data/',
+    debug: false
+  }
+};
+
+module.exports = config[process.env.NODE_ENV || 'development'];
+```
 
 ## Advanced Features
 
-### Shop System
-- **Commands**:
-  - `!shop` - View available items.
-  - `!buy <item> [quantity]` - Purchase items.
-  - `!balance` - Check current balance.
-- **Item Configuration**:
-  - Configure items in the `shopConfig.json` file.
-  - Set item names, prices, and purchase limits.
-- **Pricing System**:
-  - Define item prices in the configuration file.
-  - Support for different currencies.
-- **Purchase Limits**:
-  - Set daily or weekly purchase limits for items.
+### WebSocket Connection
+- **Connection Configuration**:
+  - The WebSocket connection is configured to use a secure WebSocket (WSS) protocol.
+  - Example:
+    ```javascript
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    this.ws = new WebSocket(`${wsProtocol}//${window.location.host}`);
+    ```
+- **Reconnection Settings**:
+  - Automatically reconnects if the connection is lost.
+  - Example:
+    ```javascript
+    this.ws.onclose = () => {
+      console.log('WebSocket connection closed. Reconnecting...');
+      setTimeout(() => this.connectWebSocket(), 5000);
+    };
+    ```
+- **Logging Details**:
+  - Logs connection status and errors.
+  - Example:
+    ```javascript
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    ```
+- **Usage Examples**:
+  - Used for real-time updates in the dashboard.
 
-### Wheel Spins Event System
-- **Ticket System**:
-  - Users earn tickets through gameplay or purchases.
-  - Tickets are used for wheel spins.
-- **Rewards Configuration**:
-  - Configure rewards in the `rewardsConfig.json` file.
-  - Define reward types and probabilities.
-- **Commands**:
-  - `!spin` - Use tickets for a wheel spin.
-  - `!tickets` - Check ticket balance.
-  - `!rewards` - View possible rewards.
-- **Admin Commands**:
-  - Manage tickets and rewards using admin commands.
-
-### Death Message System
-- **Channel Configuration**:
-  - Set up a dedicated channel for death messages.
-  - Configure in the `botConfig.json` file.
-- **Customizing Messages**:
-  - Define custom death messages.
-  - Use placeholders for player names and causes of death.
-- **Message Formatting**:
-  - Support for rich text formatting.
-  - Include images or emojis in messages.
-
-### Automated Systems
-
-#### Backup Scheduling
-- **Configuration**:
-  - Set backup intervals in the `backupConfig.json` file.
-  - Define backup locations and retention policies.
-- **Commands**:
-  - `!backup_schedule <time>` - Set backup schedule.
-  - `!backup_now` - Perform an immediate backup.
-
-#### Log Cleanup
-- **Settings**:
-  - Configure log retention in the `logConfig.json` file.
-  - Set cleanup schedules and log file locations.
-- **Commands**:
-  - `!cleanup_logs` - Force log cleanup.
-
-#### Mod Update Notifications
-- **Notifications**:
-  - Receive notifications for mod updates.
-  - Configure notification channels in the `modConfig.json` file.
-- **Admin Settings**:
-  - Set notification preferences for admins.
-
-#### Player Statistics
-- **Statistics**:
-  - Track player statistics such as kills, deaths, and playtime.
-  - View stats using commands.
-- **Commands**:
-  - `!stats` - View player statistics.
-  - `!stats_reset` - Reset player statistics.
-
-## Advanced Configuration
-
-### Channel Setup
-- **Command Channel**:
-  - Configure the command channel in the `botConfig.json` file.
-- **Public Channel**:
-  - Set up the public channel for user interactions.
-- **Log Channel**:
-  - Configure the log channel for bot logs.
-- **Death Message Channel**:
-  - Set up the channel for death messages.
-
-### Automation Settings
-- **Backup Schedule**:
-  - Configure backup intervals and retention policies.
-- **Log Cleanup**:
-  - Set log retention and cleanup schedules.
-- **Server Health Checks**:
-  - Configure health check intervals.
-- **Mod Update Checks**:
-  - Set the frequency for mod update checks.
-
-### Database Configuration
-- **Connection String**:
-  - Set up the database connection string in the `databaseConfig.json` file.
-- **Backup Settings**:
-  - Configure database backup settings.
-- **Migration Information**:
-  - Details on database migrations and updates.
-
-## Extended Command List
-
-### Shop Commands
-- `!shop` - View available items.
-- `!buy <item> [quantity]` - Purchase items.
-- `!balance` - Check current balance.
-
-### Event Commands
-- `!spin` - Use tickets for wheel spin.
-- `!tickets` - Check ticket balance.
-- `!rewards` - View possible rewards.
-
-### Admin Commands
-- `!backup_schedule <time>` - Set backup schedule.
-- `!cleanup_logs` - Force log cleanup.
-- `!stats_reset` - Reset player statistics.
-
-## Troubleshooting
-
-### Common Issues
-- **Database Connection**:
-  - Ensure the connection string is correct.
-  - Check database server status.
-- **Backup Failures**:
-  - Verify backup paths and permissions.
-  - Check available disk space.
-- **Rate Limiting**:
-  - Adjust rate limit settings in the `rateLimitConfig.json` file.
-- **Permission Errors**:
-  - Ensure correct role and permission configurations.
-
-### Performance Optimization
-- **Server Resources**:
-  - Monitor CPU and memory usage.
-  - Optimize server settings.
-- **Database Optimization**:
-  - Index frequently queried columns.
-  - Use caching for common queries.
-- **Backup Optimization**:
-  - Schedule backups during low-traffic periods.
-  - Compress backup files.
-- **Log Management**:
-  - Regularly clean up old logs.
-  - Use log rotation.
-
-## API Reference
-
-### Endpoints
-- **Player Statistics**:
-  - `/api/stats` - Get player statistics.
-- **Server Status**:
-  - `/api/status` - Get server status.
-- **Mod Information**:
-  - `/api/mods` - Get mod information.
-- **Backup Status**:
-  - `/api/backup` - Get backup status.
-
-### Authentication
-- **Token Management**:
-  - Generate and manage API tokens.
-- **Permission Levels**:
-  - Define permission levels for API access.
-- **Rate Limiting**:
-  - Configure rate limits for API endpoints.
-
-## Security
-
-### Best Practices
-- **Token Management**:
-  - Keep API tokens secure.
-  - Rotate tokens regularly.
-- **Permission Configuration**:
-  - Assign appropriate permissions to roles.
-  - Regularly review permission settings.
-- **Database Security**:
-  - Use strong passwords for database access.
-  - Enable encryption for sensitive data.
-- **Backup Encryption**:
-  - Encrypt backup files.
-  - Store encryption keys securely.
+### Server Metrics
+- **Available Metrics**:
+  - CPU usage, memory usage, and player count.
+- **Broadcasting Configuration**:
+  - Metrics are broadcasted to connected clients via WebSocket.
+- **Accessing Metrics**:
+  - Metrics can be accessed in the dashboard.
+- **Custom Metric Setup**:
+  - Add custom metrics by modifying the server monitoring service.
 
 ### Rate Limiting
-- **Configuration Options**:
-  - Set rate limits in the `rateLimitConfig.json` file.
 - **Default Limits**:
-  - Define default rate limits for endpoints.
-- **Override Settings**:
-  - Allow overrides for specific users or roles.
+  - Default rate limits are set to 100 requests per minute.
+- **Configuration Options**:
+  - Rate limits can be configured in the `rateLimitConfig.json` file.
+- **Admin Override**:
+  - Admins can override rate limits for specific users.
+- **Limit Reset Behavior**:
+  - Rate limits reset every minute.
+
+### Error Handling
+- **Error Categories**:
+  - Network errors, payment errors, and general errors.
+- **Log Formats**:
+  - Errors are logged with detailed information.
+- **Error Recovery**:
+  - Implements recovery mechanisms for common errors.
+- **Troubleshooting Guide**:
+  - Provides steps to troubleshoot common errors.
+
+### Logging System
+- **Log Configuration**:
+  - Logs are configured using Serilog.
+- **File Rotation Settings**:
+  - Logs are rotated daily.
+- **Log Format Reference**:
+  - Logs are formatted using the CompactJsonFormatter.
+- **Storage Management**:
+  - Old logs are archived and managed to save storage space.
+
+### Permission System
+- **Role Hierarchy**:
+  - Roles include Player, Moderator, Admin, and Owner.
+- **Permission Levels**:
+  - Each role has specific permissions.
+- **Role Assignment**:
+  - Roles can be assigned using admin commands.
+- **Command Access Matrix**:
+  - Defines which commands are accessible by each role.
