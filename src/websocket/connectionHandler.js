@@ -1,10 +1,11 @@
 const WebSocket = require('ws');
 
 const connectWebSocket = () => {
-  const ws = new WebSocket('ws://your-websocket-server');
+  const ws = new WebSocket('wss://your-websocket-server');
 
   ws.on('open', () => {
     console.log('WebSocket connection established');
+
   });
 
   ws.on('close', () => {

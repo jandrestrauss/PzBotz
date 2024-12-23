@@ -5,6 +5,9 @@ const { updateDocumentation } = require('./src/documentation/documentation');
 const advancedMetrics = require('./src/monitoring/advancedMetrics');
 const { connectToGameServer } = require('./src/utils/connectToGameServer');
 const { isServerRunning } = require('./src/utils/serverUtils');
+const rateLimit = require('express-rate-limit');
+const RedisStore = require('rate-limit-redis');
+const redis = require('redis');
 
 const directoryPath = path.join(__dirname);
 const outputFilePath = path.join(__dirname, 'INDEX.md');
@@ -108,3 +111,18 @@ async function initializeApp() {
 }
 
 initializeApp();
+
+const limiter = rateLimit({
+  store: new RedisStore({
+    client: redis.createClient({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
+    }),
+  }),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.'
+});
+
+// Apply to all routes
+app.use(limiter);

@@ -325,10 +325,11 @@ async function initializeBot() {
                     'Authorization': `Bearer ${process.env.BATTLEMETRICS_API_KEY}`
                 }
             });
-            console.log('BattleMetrics API connection successful. Players:', response.data.data.map(player => player.attributes.name));
+            console.log('BattleMetrics API connection successful. Players:', JSON.stringify(response.data.data.map(player => player.attributes.name)));
         } catch (error) {
             console.error('Error connecting to BattleMetrics API:', error);
         }
+
     }
 
     // Function to continuously read from the server console

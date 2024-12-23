@@ -24,7 +24,15 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "@mantine/core": "^4.0.0",
-    "@mantine/hooks": "^4.0.0"
+    "@mantine/hooks": "^4.0.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5",
+    "express-rate-limit": "^5.5.1",
+    "rate-limit-redis": "^1.7.0",
+    "redis": "^3.1.2",
+    "knex": "^0.95.14",
+    "pg": "^8.7.1",
+    "node-cron": "^2.0.3"
   },
   "author": "yourusername",
   "license": "MIT",

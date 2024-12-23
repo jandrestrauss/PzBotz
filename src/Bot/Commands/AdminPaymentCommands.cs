@@ -41,10 +41,11 @@ public class AdminPaymentCommands : ModuleBase<SocketCommandContext>
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Failed to get payment stats: {ex.Message}");
+            _logger.LogError("Failed to get payment stats: {@exMessage}", ex.Message);
             await ReplyAsync("Failed to retrieve payment statistics.");
         }
     }
+
 
     [Command("refund")]
     [Summary("Process a refund")]
@@ -64,10 +65,11 @@ public class AdminPaymentCommands : ModuleBase<SocketCommandContext>
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Refund processing failed: {ex.Message}");
+            _logger.LogError("Refund processing failed: {@exMessage}", ex.Message);
             await ReplyAsync("Failed to process refund.");
         }
     }
+
 
     [Command("dashboard")]
     [Summary("View payment system analytics dashboard")]
@@ -91,8 +93,9 @@ public class AdminPaymentCommands : ModuleBase<SocketCommandContext>
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Failed to generate dashboard: {ex.Message}");
+            _logger.LogError("Failed to generate dashboard: {@exMessage}", ex.Message);
             await ReplyAsync("Failed to retrieve dashboard data.");
         }
     }
+
 }

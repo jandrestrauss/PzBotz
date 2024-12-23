@@ -1,6 +1,21 @@
 const { RateLimiterRedis } = require('rate-limiter-flexible');
 const RedisManager = require('../cache/redisManager');
 const logger = require('../utils/logger');
+const rateLimit = require('express-rate-limit');
+const RedisStore = require('rate-limit-redis');
+const redis = require('redis');
+
+const limiter = rateLimit({
+  store: new RedisStore({
+    client: redis.createClient({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
+    }),
+  }),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.'
+});
 
 class GlobalRateLimiter {
     constructor() {
@@ -85,3 +100,4 @@ class GlobalRateLimiter {
 }
 
 module.exports = new GlobalRateLimiter();
+module.exports.limiter = limiter;

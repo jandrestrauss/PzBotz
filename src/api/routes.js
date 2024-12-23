@@ -33,10 +33,11 @@ router.get('/stats', async (req, res) => {
     }
 });
 
-router.post('/players/:id/kick', async (req, res) => {
+router.post('/players/:id/kick', csrfProtection, async (req, res) => { // import { csrfProtection } from 'your-csrf-middleware'
     try {
         const { id } = req.params;
         const { reason } = req.body;
+
         await global.serverControl.kickPlayer(id, reason);
         res.json({ success: true });
     } catch (error) {
@@ -79,10 +80,11 @@ router.get('/players/:id/stats', authenticate, async (req, res) => {
 });
 
 // Server management endpoints
-router.post('/server/restart', authenticate, async (req, res) => {
+router.post('/server/restart', authenticate, csrfProtection, async (req, res) => { // import { csrfProtection } from 'your-csrf-middleware'
     try {
         if (!req.user.isAdmin) return res.status(403).json({ error: 'Unauthorized' });
         await global.serverManager.restart();
+
         res.json({ message: 'Server restart initiated' });
     } catch (error) {
         logger.error('Failed to restart server:', error);
@@ -104,9 +106,11 @@ router.get('/systems/status',
 );
 
 router.post('/systems/:systemName/action',
+    csrfProtection, // import { csrfProtection } from 'your-csrf-middleware'
     permissionMiddleware('SERVER_CONTROL'),
     async (req, res) => {
         const { systemName } = req.params;
+
         const { action, params } = req.body;
         
         const system = systemIntegration.systems.get(systemName);

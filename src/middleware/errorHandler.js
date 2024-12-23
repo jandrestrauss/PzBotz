@@ -1,29 +1,40 @@
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
 
 class ErrorHandler {
-    static async handleError(error, req, res, next) {
-        logger.error('Unhandled error:', error);
+    static async handleError(err, req, res, next) {
+        const errorId = uuidv4();
+        
+        // Log error details
+        console.error({
+            errorId,
+            timestamp: new Date(),
+            error: err.message,
+            stack: err.stack,
+            path: req.path,
+            method: req.method
+        });
 
         if (res.headersSent) {
-            return next(error);
+            return next(err);
         }
 
-        const statusCode = error.statusCode || 500;
+        const statusCode = err.status || 500;
         const message = process.env.NODE_ENV === 'production' 
-            ? 'Internal server error' 
-            : error.message;
+            ? 'An unexpected error occurred' 
+            : err.message;
 
         res.status(statusCode).json({
             error: {
                 message,
-                code: error.code || 'INTERNAL_ERROR',
-                timestamp: new Date().toISOString()
+                errorId,
+                status: statusCode
             }
         });
 
         // Log critical errors to Discord if configured
         if (statusCode === 500 && global.discord) {
-            await this.notifyDiscord(error);
+            await this.notifyDiscord(err);
         }
     }
 
@@ -46,4 +57,11 @@ class ErrorHandler {
     }
 }
 
-module.exports = ErrorHandler;
+class AppError extends Error {
+    constructor(message, status = 500) {
+        super(message);
+        this.status = status;
+    }
+}
+
+module.exports = { ErrorHandler, AppError };

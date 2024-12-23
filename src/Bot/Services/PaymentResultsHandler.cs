@@ -34,8 +34,9 @@ public class PaymentResultsHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Payment handling failed: {ex.Message}");
+            _logger.LogError("Payment handling failed: {@exMessage}", ex.Message);
             throw;
         }
     }
+
 }

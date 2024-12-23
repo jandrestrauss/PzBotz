@@ -11,10 +11,11 @@ router.get('/sync/status', requireAdmin, (req, res) => {
     });
 });
 
-router.post('/sync/start', requireAdmin, async (req, res) => {
+router.post('/sync/start', requireAdmin, csrfProtection, async (req, res) => { // import { csrfProtection } from 'your-csrf-middleware'
     try {
         await playerSync.startSync();
         res.json({ success: true, message: 'Sync started' });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

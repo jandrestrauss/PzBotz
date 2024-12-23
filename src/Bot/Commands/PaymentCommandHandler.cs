@@ -109,10 +109,11 @@ public class PaymentCommandHandler : ModuleBase<SocketCommandContext>
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Failed to get transaction history: {ex.Message}");
+            _logger.LogError("Failed to get transaction history: {@ex.Message}", ex.Message);
             await ReplyAsync(Localization.Get("transaction_history_error"));
         }
     }
+
 
     [Command("summary")]
     [Summary("View your payment summary")]

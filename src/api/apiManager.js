@@ -26,8 +26,10 @@ class ApiManager {
         router.post('/system/control/:action',
             rateLimitMiddleware,
             permissionMiddleware('SERVER_CONTROL'),
+            csrfProtection, // import { csrfProtection } from 'your-csrf-middleware'
             this.handleSystemControl.bind(this));
     }
+
 
     async handleSystemControl(req, res) {
         try {

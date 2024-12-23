@@ -41,6 +41,12 @@ This bot is written for people to easily manage their Project Zomboid server usi
 - Automated mod update notifications to notify admins when a mod update is detected.
 - Automated player statistics tracking to track and display player statistics over time.
 - Automated server health checks to periodically check server health and notify admins if any issues are detected.
+- **New:** Robust WebSocket connection handling with reconnection logic and detailed logging.
+- **New:** Broadcasting server metrics and advanced metrics to connected clients.
+- **New:** Rate limiting to prevent abuse.
+- **New:** Enhanced error handling with detailed logging.
+- **New:** Comprehensive logging system with daily rotation.
+- **New:** Permission system for role-based access control.
 
 ## Project Scope
 
@@ -72,6 +78,12 @@ This bot is written for people to easily manage their Project Zomboid server usi
 - Automated mod update notifications to notify admins when a mod update is detected.
 - Automated player statistics tracking to track and display player statistics over time.
 - Automated server health checks to periodically check server health and notify admins if any issues are detected.
+- **New:** Robust WebSocket connection handling with reconnection logic and detailed logging.
+- **New:** Broadcasting server metrics and advanced metrics to connected clients.
+- **New:** Rate limiting to prevent abuse.
+- **New:** Enhanced error handling with detailed logging.
+- **New:** Comprehensive logging system with daily rotation.
+- **New:** Permission system for role-based access control.
 
 ### Limitations
 - The bot does not support multiple Discord servers.
@@ -523,12 +535,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 4. Run `npm install`
 5. Run `install.bat`
 
+Run the following command to install the required dependencies:
+
+```bash
+npm install winston winston-daily-rotate-file express-rate-limit rate-limit-redis redis knex pg node-cron
+```
+
 ## Configuration
 Update `.env` file with:
 - Discord bot token
 - Database credentials
 - Server paths
 - Channel IDs
+
+Add the following environment variables to your `.env` file:
+
+```env
+WS_URL=your_websocket_url
+BACKUP_PATH=/path/to/backups
+```
 
 ## Commands
 ### General
@@ -692,3 +717,81 @@ Update `.env` file with:
 - Set deadlines for each task and track progress.
 - Conduct regular reviews to ensure tasks are on track.
 - Test thoroughly before deploying to production.
+
+# PzBotz
+
+## Overview
+PzBotz is an Electron application designed with security best practices in mind.
+
+## Security Configuration
+
+The `BrowserWindow` is configured with the following security settings:
+- `nodeIntegration: false` - Disables Node.js integration in renderer processes.
+- `contextIsolation: true` - Isolates the main process and renderer process.
+- `sandbox: true` - Enables sandboxing for additional security.
+- `webSecurity: true` - Maintains web security.
+- `allowRunningInsecureContent: false` - Prevents running insecure content.
+- `preload: path.join(__dirname, 'preload.js')` - Uses a preload script for safe IPC communication.
+
+## Preload Script
+
+The preload script (`preload.js`) safely exposes specific APIs for IPC communication:
+
+```javascript
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+  // Expose specific functions with limited scope
+  doSomething: (data) => {
+    return ipcRenderer.invoke('doSomething', data);
+  }
+});
+```
+
+## Application Lifecycle
+
+The application handles its lifecycle properly to ensure resources are managed correctly:
+
+```javascript
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
+
+  // Load your content
+  win.loadFile('index.html');
+}
+
+// Create window when app is ready
+app.whenReady().then(createWindow);
+
+// Proper app lifecycle handling
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+```
+
+## Best Practices
+
+- Always validate and sanitize data passed between processes.
+- Never enable elevated privileges unless absolutely necessary.

@@ -25,10 +25,11 @@ const reconnect = (ws) => {
   if (ws.readyState === WebSocket.CLOSED) {
     // Logic to reconnect WebSocket
     // Example:
-    const newWs = new WebSocket('ws://localhost:8080');
+    const newWs = new WebSocket('wss://localhost:8080');
     newWs.on('open', () => {
       console.log('Reconnected to WebSocket server');
     });
+
     newWs.on('error', (error) => {
       console.error('Reconnection error:', error);
     });

@@ -1,9 +1,23 @@
-const socket = new WebSocket(`ws://${window.location.host}`);
+const socket = new WebSocket(`wss://${window.location.host}`);
 
 socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'stats_update') {
-        updateStats(data.data);
+    const ajv = new Ajv(); // const Ajv = require("ajv")
+    const schema = {
+        type: "object",
+        properties: {
+            type: { type: "string" },
+            data: { type: "object" }
+        },
+        required: ["type", "data"]
+    }
+    const validate = ajv.compile(schema)
+    if(validate(JSON.parse(event.data))) {
+        const data = JSON.parse(event.data);
+        if (data.type === 'stats_update') {
+            updateStats(data.data);
+        }
+    } else {
+        throw new Error('Data does not pass validation');
     }
 };
 
