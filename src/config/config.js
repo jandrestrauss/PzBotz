@@ -1,10 +1,16 @@
-// ...existing code...
+const path = require('path');
+const logger = require('../utils/logger');
 
 const config = {
-  PORT: process.env.PORT || 3000,
-  DB_CONNECTION: process.env.DB_CONNECTION || 'mongodb://localhost:27017/pzbotz',
-  MAX_REQUESTS_PER_MINUTE: process.env.MAX_REQUESTS_PER_MINUTE || 60,
-  // ...other configuration options...
+  development: {
+    paths: {
+      backups: process.env.BACKUP_PATH || path.join(__dirname, '../../backups'),
+      logs: path.join(__dirname, '../../logs')
+    }
+  },
+  production: {
+    // Production config will inherit from development
+  }
 };
 
 module.exports = config;

@@ -33,3 +33,8 @@
 - [ ] Update installation guide
 - [ ] Add troubleshooting guide
 - [ ] Document configuration options
+- [ ] API documentation
+- [ ] Developer guide
+- [ ] Installation guide
+- [ ] Troubleshooting guide
+- [ ] Configuration options

@@ -1,0 +1,8 @@
+[
+    "{player} met their end via {cause}. Press F to pay respects.",
+    "{player} is now swimming with the zombies. Cause: {cause}",
+    "RIP {player} - they didn't see that {cause} coming.",
+    "{player} has rage quit life due to {cause}.",
+    "Game Over! {player} was defeated by {cause}.",
+    "{player}'s story ended with {cause}. Better luck next time!"
+]

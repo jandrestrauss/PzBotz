@@ -1,0 +1,17 @@
+{
+  "commands": {
+    "restart": {
+      "description": "Restarts the server",
+      "success": "Server is restarting...",
+      "no_permission": "You do not have permission to use this command."
+    },
+    "status": {
+      "description": "Gets the server status",
+      "response": "Server status: "
+    },
+    "players": {
+      "description": "Lists the players on the server",
+      "response": "Players: "
+    }
+  }
+}

@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Basic Supply Pack",
+        "id": "Base.FirstAidKit",
+        "quantity": 1,
+        "weight": 40
+    },
+    {
+        "name": "Advanced Weapon",
+        "id": "Base.Katana",
+        "quantity": 1,
+        "weight": 10
+    },
+    {
+        "name": "Food Package",
+        "id": "Base.CannedFood",
+        "quantity": 5,
+        "weight": 30
+    }
+]

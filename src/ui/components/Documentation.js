@@ -1,43 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import ConfigurationGuide from '../../documentation/components/ConfigurationGuide';
+import InstallationGuide from '../../documentation/components/InstallationGuide';
+import FeaturesGuide from '../../documentation/components/FeaturesGuide';
+import RconCommandsGuide from '../../documentation/components/RconCommandsGuide';
+import MaintenanceGuide from '../../documentation/components/MaintenanceGuide';
+import ModManagementGuide from '../../documentation/components/ModManagementGuide';
+import DiscordGuide from '../../documentation/components/DiscordGuide';
+import PerformanceGuide from '../../documentation/components/PerformanceGuide';
+import MonitoringGuide from '../../documentation/components/MonitoringGuide';
+import TroubleshootingGuide from '../../documentation/components/TroubleshootingGuide';
 
 const Documentation = () => {
-    const [docs, setDocs] = useState([]);
-
-    useEffect(() => {
-        fetchDocs();
-    }, []);
-
-    const fetchDocs = async () => {
-        const response = await fetch('/api/docs');
-        const data = await response.json();
-        setDocs(data);
-    };
-
-    const handleDocUpdate = async (docId, content) => {
-        await fetch(`/api/docs/${docId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content })
-        });
-        await fetchDocs();
-    };
-
-    return (
-        <div className="documentation">
-            <h2>Documentation Updates</h2>
-            <div className="docs-list">
-                {docs.map(doc => (
-                    <div key={doc.id} className="doc-card">
-                        <h3>{doc.title}</h3>
-                        <textarea
-                            value={doc.content}
-                            onChange={(e) => handleDocUpdate(doc.id, e.target.value)}
-                        />
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <div className="documentation">
+      <div className="docs-list">
+        <ConfigurationGuide />
+        <InstallationGuide />
+        <FeaturesGuide />
+        <RconCommandsGuide />
+        <MaintenanceGuide />
+        <ModManagementGuide />
+        <DiscordGuide />
+        <PerformanceGuide />
+        <MonitoringGuide />
+        <TroubleshootingGuide />
+      </div>
+    </div>
+  );
 };
 
 export default Documentation;

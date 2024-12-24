@@ -1,54 +1,28 @@
 require('dotenv').config();
-const { Client, Intents } = require('discord.js');
-const database = require('./database');
-const config = require('./config');
+const fs = require('fs');
+const path = require('path');
+const app = require('./app');
 const logger = require('./utils/logger');
-const commandHandler = require('./commands/handler');
-const DiscordEventHandler = require('./events/discordEvents');
-const TaskManager = require('./scheduler/taskManager');
-const WindowsServiceManager = require('./deployment/windowsService');
-const ServerHealth = require('./utils/serverHealth');
 
-class PZBot {
-    constructor() {
-        this.client = new Client({
-            intents: [
-                Intents.FLAGS.GUILDS,
-                Intents.FLAGS.GUILD_MESSAGES,
-                Intents.FLAGS.GUILD_MEMBERS
-            ]
-        });
-        this.initialize();
+// Ensure required directories exist
+['logs', 'backups', 'config'].forEach(dir => {
+    const dirPath = path.join(__dirname, '..', dir);
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
     }
+});
 
-    async initialize() {
-        try {
-            await database.completeMigrationSystem();
-            await config.loadConfig();
-            
-            this.client.login(process.env.DISCORD_TOKEN);
-            
-            new DiscordEventHandler(this.client);
-            new TaskManager().initialize();
-            
-            process.on('SIGTERM', () => this.shutdown());
-            process.on('SIGINT', () => this.shutdown());
-            
-            logger.info('PZBot initialized successfully');
-        } catch (error) {
-            logger.error('Failed to initialize PZBot:', error);
-            process.exit(1);
-        }
-    }
-
-    async shutdown() {
-        logger.info('Shutting down PZBot...');
-        await this.client.destroy();
-        process.exit(0);
-    }
+// Read bot token
+const tokenPath = path.join(__dirname, '../bot_token.txt');
+if (!fs.existsSync(tokenPath)) {
+    logger.error('bot_token.txt not found');
+    process.exit(1);
 }
 
-new PZBot();
+process.env.DISCORD_TOKEN = fs.readFileSync(tokenPath, 'utf8').trim();
+
+// Start application
+app.start();
 
 import React from 'react';
 import ReactDOM from 'react-dom';

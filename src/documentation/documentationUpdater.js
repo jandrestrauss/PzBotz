@@ -9,6 +9,20 @@ const updateDocumentation = (filePath, content) => {
   console.log(`Documentation updated: ${filePath}`);
 };
 
+// Add logic to update the new documentation sections
+function updateDocumentation() {
+  // ...existing code...
+
+  // Example:
+  updateSection('apiDocumentation', apiDocumentation);
+  updateSection('developerGuide', developerGuide);
+  updateSection('installationGuide', installationGuide);
+  updateSection('troubleshootingGuide', troubleshootingGuide);
+  updateSection('configurationOptions', configurationOptions);
+
+  // ...existing code...
+}
+
 // ...existing code...
 
 module.exports = { updateDocumentation };

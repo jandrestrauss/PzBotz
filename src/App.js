@@ -64,6 +64,11 @@ const logger = require('./utils/logger');
 
 require('dotenv').config();
 
+const bot = require('./bot');
+const monitorService = require('./services/monitorService');
+const backupService = require('./services/backupService');
+const autoRestartService = require('./services/autoRestartService');
+
 class PZBotzApp {
     constructor() {
         this.mainWindow = null;
@@ -92,6 +97,11 @@ class PZBotzApp {
             await SettingsManager.loadSettings();
             await ApplicationManager.initialize();
             BackupManager.scheduleBackup();
+            await bot.start();
+            monitorService.start();
+            backupService.start();
+            autoRestartService.start();
+            logger.info('Application started successfully');
         } catch (error) {
             logger.error('Failed to initialize application:', error);
             app.quit();
@@ -119,5 +129,15 @@ class PZBotzApp {
         }
     }
 }
+
+process.on('uncaughtException', (error) => {
+    logger.error('Unhandled error:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (error) => {
+    logger.error('Unhandled error:', error);
+    process.exit(1);
+});
 
 new PZBotzApp();

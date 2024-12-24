@@ -1,13 +1,13 @@
+const rcon = require('../rcon');
+const localization = require('../../config/localization/en.json');
+
 module.exports = {
-    name: 'status',
-    description: 'Get server status',
-    async execute(message, args, client) {
-        const rcon = require('../utils/rcon');
-        try {
-            const response = await rcon.sendCommand('status');
-            message.channel.send(`Server Status: ${response}`);
-        } catch (error) {
-            message.channel.send('Failed to get server status.');
-        }
-    }
+  name: 'status',
+  description: localization.commands.status.description,
+  execute(message, args) {
+    rcon.send('status');
+    rcon.once('response', (str) => {
+      message.channel.send(localization.commands.status.response + str);
+    });
+  }
 };

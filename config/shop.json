@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Water Bottle",
+        "id": "Base.WaterBottleFull",
+        "quantity": 1,
+        "cost": 100
+    },
+    {
+        "name": "Baseball Bat",
+        "id": "Base.BaseballBat",
+        "quantity": 1,
+        "cost": 250
+    },
+    {
+        "name": "First Aid Kit",
+        "id": "Base.FirstAidKit",
+        "quantity": 1,
+        "cost": 500
+    }
+]
