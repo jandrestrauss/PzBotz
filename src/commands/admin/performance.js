@@ -1,49 +1,40 @@
 const Command = require('../base/Command');
-const performanceReport = require('../../services/performanceReport');
-const { MessageEmbed } = require('discord.js');
+const statisticsService = require('../../services/statisticsService');
+const chartGenerator = require('../../utils/chartGenerator');
+const { MessageAttachment, MessageEmbed } = require('discord.js');
 
 class PerformanceCommand extends Command {
     constructor() {
-        super('performance', 'View server performance stats and reports', { 
-            permissions: ['ADMINISTRATOR'] 
-        });
+        super('performance', 'View server performance charts', { permissions: ['ADMINISTRATOR'] });
     }
 
     async execute(message, args) {
+        const timeframe = this.parseTimeframe(args[0]);
         try {
-            if (args[0] === 'report') {
-                const report = performanceReport.generateReport();
-                const embed = this.createReportEmbed(report);
-                return message.reply({ embeds: [embed] });
-            }
+            const stats = await statisticsService.getStatistics(timeframe);
+            const chartBuffer = await chartGenerator.generatePerformanceChart(stats, timeframe);
+            
+            const attachment = new MessageAttachment(chartBuffer, 'performance.png');
+            const embed = new MessageEmbed()
+                .setTitle('Server Performance')
+                .setImage('attachment://performance.png')
+                .setFooter({ text: `Last ${timeframe / (1000 * 60 * 60)} hours` });
 
-            const summary = performanceReport.generateSummary();
-            const embed = this.createStatsEmbed(summary);
-            return message.reply({ embeds: [embed] });
+            return message.reply({ embeds: [embed], files: [attachment] });
         } catch (error) {
-            return message.reply('Failed to generate performance information');
+            return message.reply('Failed to generate performance chart');
         }
     }
 
-    createReportEmbed(report) {
-        return new MessageEmbed()
-            .setTitle('Server Performance Report')
-            .setColor('#00ff00')
-            .addField('CPU Usage', `Average: ${report.summary.averageCpu.toFixed(2)}%\nPeak: ${report.summary.peakCpu.toFixed(2)}%`)
-            .addField('Memory Usage', `Average: ${report.summary.averageMemory.toFixed(2)}%\nPeak: ${report.summary.peakMemory.toFixed(2)}%`)
-            .addField('Players', `Average: ${report.summary.averagePlayers.toFixed(1)}`)
-            .addField('Recommendations', report.recommendations.join('\n') || 'No recommendations')
-            .setFooter({ text: `Generated at ${new Date().toLocaleString()}` });
-    }
-
-    createStatsEmbed(summary) {
-        return new MessageEmbed()
-            .setTitle('Current Performance Statistics')
-            .setColor('#0099ff')
-            .addField('CPU Usage', `${summary.averageCpu.toFixed(2)}%`)
-            .addField('Memory Usage', `${summary.averageMemory.toFixed(2)}%`)
-            .addField('Players', `${summary.averagePlayers.toFixed(1)}`)
-            .setFooter({ text: `Last hour average` });
+    parseTimeframe(arg) {
+        // Default to 24 hours
+        if (!arg) return 24 * 60 * 60 * 1000;
+        
+        const hours = parseInt(arg);
+        if (isNaN(hours) || hours < 1 || hours > 168) {
+            return 24 * 60 * 60 * 1000;
+        }
+        return hours * 60 * 60 * 1000;
     }
 }
 

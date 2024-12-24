@@ -1,126 +1,65 @@
 # Configuration Guide
 
-## Environment Variables
-
+## Environment Settings
+Create `.env` file in root directory:
 ```env
-# Required Settings
-BOT_TOKEN=your_discord_bot_token
-RCON_HOST=your_server_ip
+# Required
+DISCORD_TOKEN=your_bot_token
+RCON_HOST=localhost
 RCON_PORT=27015
 RCON_PASSWORD=your_rcon_password
 
-# Optional Settings
-REDIS_HOST=localhost
-REDIS_PORT=6379
-MONGODB_URI=mongodb://localhost:27017/pzbot
+# Optional
 LOG_LEVEL=info
+BACKUP_PATH=./backups
 ```
 
-## Rate Limiting Configuration
-
-```javascript
-{
-    commands: {
-        points: 20,
-        duration: 60,
-        blockDuration: 60
-    },
-    api: {
-        points: 100,
-        duration: 300,
-        blockDuration: 600
-    }
-}
+## Shop Configuration
+Edit `config/shop.json`:
+```json
+[
+  {
+    "name": "Water Bottle",
+    "id": "Base.WaterBottleFull",
+    "quantity": 1,
+    "cost": 100
+  }
+]
 ```
 
-## Server Settings
+## Points System
+Points are automatically synchronized with game data every 5 minutes.
+Manual configuration in `data/points.json` is not recommended.
 
-1. RCON Configuration
-   ```json
-   {
-     "host": "156.38.164.50",
-     "port": 27015,
-     "password": "Smart123",
-     "timeout": 5000
-   }
-   ```
-
-2. Backup Settings
-   ```json
-   {
-     "backupInterval": 1440,
-     "maxBackups": 7,
-     "compressionLevel": 9
-   }
-   ```
-
-3. Monitoring Settings
-   ```json
-   {
-     "checkInterval": 300,
-     "alertThresholds": {
-       "cpu": 80,
-       "memory": 85,
-       "disk": 90
-     }
-   }
-   ```
-
-## Permission Levels
-
-```javascript
-{
-    OWNER: 4,    // Full access
-    ADMIN: 3,    // Server management
-    MOD: 2,      // Player management
-    USER: 1,     // Basic commands
-    GUEST: 0     // View only
-}
+## Death Messages
+Edit `config/death_messages.json`:
+```json
+[
+  "{player} met their end via {cause}",
+  "{player} has fallen to {cause}"
+]
 ```
 
-## Feature Flags
-
-```javascript
-{
-    enableWebsocket: true,
-    enableDatabase: true,
-    enableCache: true,
-    enableMetrics: true
-}
+## Wheel Spins
+Edit `config/wheel.json`:
+```json
+[
+  {
+    "name": "Common Reward",
+    "id": "Base.FirstAidKit",
+    "quantity": 1,
+    "weight": 40
+  }
+]
 ```
 
-## Channel Configuration
+## Performance Monitoring
+Default thresholds:
+- CPU: 80%
+- Memory: 90%
+- Disk Space: 90%
 
-```javascript
-{
-    commandChannel: "channel_id",
-    logChannel: "channel_id",
-    alertChannel: "channel_id"
-}
-```
-
-## Updating Configuration
-
-1. Update Environment
-   ```bash
-   nano .env
-   ```
-
-2. Update Bot Settings
-   ```bash
-   !reloadconfig
-   ```
-
-3. Apply Changes
-   ```bash
-   npm run update:config
-   ```
-
-## Security Settings
-
-```javascript
-{
-    maxLoginAttempts: 3,
-    sessionTimeout: 3600,
-    requireAuth: true
-}
+## Backup Configuration
+- Default interval: 6 hours
+- Retention: 5 backups
+- Path: ./backups

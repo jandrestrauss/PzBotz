@@ -1,17 +1,12 @@
 # Development Guide
 
-## Project Architecture
+## Project Structure
 ```
-/PZBotV
-├── src/
-│   ├── handlers/         # Event and command handlers
-│   ├── middleware/       # Authentication and rate limiting
-│   ├── database/        # Database models and connections
-│   ├── websocket/       # WebSocket handling
-│   ├── cache/           # Redis caching
-│   └── utils/           # Utility functions
-├── docs/               # Documentation
-└── config/            # Configuration files
+src/
+├── commands/      # Bot commands
+├── services/      # Core services
+├── utils/         # Utilities
+└── monitoring/    # Monitoring systems
 ```
 
 ## Core Components
@@ -62,6 +57,31 @@ docker-compose up -d mongodb
 npm run dev
 ```
 
+## Adding New Commands
+1. Create command file in `src/commands/`
+2. Extend base Command class
+3. Implement execute method
+4. Register in CommandHandler
+
+Example:
+```javascript
+class NewCommand extends Command {
+    constructor() {
+        super('commandname', 'description');
+    }
+
+    async execute(message, args) {
+        // Implementation
+    }
+}
+```
+
+## Services
+- Use dependency injection
+- Implement event emitters
+- Add error handling
+- Document public methods
+
 ## Monitoring & Logs
 - Check `logs/` directory for application logs
 - Monitor Redis using `redis-cli monitor`
@@ -69,9 +89,14 @@ npm run dev
 
 ## Testing
 ```bash
-npm test                 # Run all tests
-npm run test:unit       # Unit tests only
-npm run test:integration # Integration tests only
+# Run all tests
+npm test
+
+# Run specific suite
+npm test -- --grep "Service Tests"
+
+# Coverage report
+npm run coverage
 ```
 
 ## Deployment
@@ -83,6 +108,22 @@ npm run build
 2. Deploy using PM2:
 ```bash
 pm2 start ecosystem.config.js
+```
+
+## Code Style
+- Use ESLint configuration
+- Follow naming conventions
+- Add JSDoc comments
+- Write unit tests
+
+## Error Handling
+```javascript
+try {
+    await riskyOperation();
+} catch (error) {
+    logger.error('Operation failed:', error);
+    throw new CustomError(error);
+}
 ```
 
 ## Security Considerations

@@ -1,5 +1,14 @@
 # Testing Guide
 
+## Setup Testing Environment
+```bash
+# Install dev dependencies
+npm install --save-dev jest @types/jest
+
+# Configure test environment
+cp .env.example .env.test
+```
+
 ## Test Structure
 ```
 /tests
@@ -13,6 +22,12 @@
 ```bash
 # Run all tests
 npm test
+
+# Run specific test suite
+npm test -- services/points
+
+# Watch mode
+npm test -- --watch
 
 # Run specific test suite
 npm run test:unit
@@ -105,6 +120,9 @@ npm run test:integration
 
 # Run payment flow tests
 npm run test:integration:payment
+
+# With coverage
+npm run test:integration -- --coverage
 ```
 
 #### End-to-End Tests
@@ -207,3 +225,33 @@ Ensure that performance tests are conducted to monitor memory usage and response
 
 ## Detailed Performance Metrics Testing
 Ensure that detailed performance metrics are logged, including CPU usage, memory usage, and disk I/O. Use the `LogDetailedPerformanceMetrics` method in `PerformanceOptimizationService` to log these metrics.
+
+## Test Structure
+```typescript
+// Example test structure
+describe('PointsService', () => {
+  beforeEach(() => {
+    // Setup
+  });
+
+  it('should add points correctly', async () => {
+    // Test
+  });
+
+  afterEach(() => {
+    // Cleanup
+  });
+});
+```
+
+## Mocking
+```typescript
+// Example mocks
+jest.mock('../services/rconService');
+jest.mock('../utils/logger');
+
+// Mock implementation
+const mockRcon = {
+  execute: jest.fn()
+};
+```

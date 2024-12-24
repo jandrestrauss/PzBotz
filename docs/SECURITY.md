@@ -133,3 +133,50 @@ const PAYMENT_ROLES = {
 2. Rate limit breaches
 3. Unusual activity patterns
 4. Server health metrics
+
+## Configuration Security
+
+### Environment Variables
+- Never commit .env files
+- Use strong passwords
+- Rotate secrets regularly
+- Encrypt sensitive data
+
+### File Permissions
+```bash
+# Set correct permissions
+chmod 600 config/*.json
+chmod 600 .env
+chmod 600 bot_token.txt
+```
+
+## Bot Token Security
+- Store token in bot_token.txt
+- Never share or expose token
+- Rotate token if compromised
+- Use token environment variable
+
+## RCON Security
+- Use strong passwords
+- Change default ports
+- Restrict IP access
+- Enable SSL/TLS
+
+## Points System Security
+- Validate all inputs
+- Check permissions
+- Log all transactions
+- Regular audits
+- Sync verification
+
+## Backup Security
+- Encrypt backups
+- Secure storage
+- Regular testing
+- Access controls
+
+## Monitoring
+- Log access attempts
+- Track command usage
+- Monitor file changes
+- Alert on suspicious activity

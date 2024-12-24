@@ -130,6 +130,36 @@ class PZBotzApp {
     }
 }
 
+class Application {
+    constructor() {
+        this.services = {
+            deathMessages: require('./services/deathMessageHandler'),
+            points: require('./services/pointsSystem'),
+            monitor: require('./services/healthMonitor'),
+            maintenance: require('./services/maintenanceService'),
+            statistics: require('./services/statisticsService'),
+            gameDataSync: require('./services/gameDataSync')
+        };
+    }
+
+    async start() {
+        try {
+            // Initialize all services
+            await bot.start();
+            this.services.deathMessages.startWatching(bot.client);
+            this.services.monitor.start();
+            this.services.maintenance.start();
+            this.services.statistics.start();
+            this.services.gameDataSync.start();
+            
+            logger.info('Application started successfully');
+        } catch (error) {
+            logger.error('Application failed to start:', error);
+            process.exit(1);
+        }
+    }
+}
+
 process.on('uncaughtException', (error) => {
     logger.error('Unhandled error:', error);
     process.exit(1);

@@ -1,5 +1,12 @@
 # Installation Guide
 
+## System Requirements
+- Windows Operating System
+- Node.js 16 or higher
+- .NET Framework 4.7.2
+- 2GB RAM minimum
+- 1GB free disk space
+
 ## Prerequisites
 1. Node.js 16.x or higher
 2. MongoDB (optional)
@@ -9,59 +16,56 @@
 
 ## Step-by-Step Installation
 
-### 1. Server Setup
-```bash
-# Clone repository
-git clone https://github.com/yourusername/PZBotV.git
-cd PZBotV
+1. **Download and Extract**
+   - Download latest release from GitHub
+   - Extract to your Project Zomboid Dedicated Server folder
+   - Verify folder structure matches documentation
 
-# Install dependencies
-npm install
+2. **Dependencies Setup**
+   ```bash
+   npm install
+   ```
 
-# Create required directories
-node check-directory.js
-```
+3. **Server Configuration**
+   - Rename your server startup file to `server.bat`
+   - Create `bot_token.txt` in root directory
+   - Paste your Discord bot token into `bot_token.txt`
 
-### 2. Configuration Files
-```bash
-# Create environment file
-cp .env.example .env
+4. **Environment Setup**
+   - Copy `.env.example` to `.env`
+   - Update RCON settings in `.env`:
+     ```env
+     RCON_HOST=localhost
+     RCON_PORT=27015
+     RCON_PASSWORD=your_password
+     ```
 
-# Create configuration
-cp config.example.json config.json
-```
+5. **Verify Installation**
+   ```bash
+   npm run verify
+   ```
 
-### 3. Database Setup (Optional)
-```bash
-# Start MongoDB
-mongod --dbpath=/data/db
-
-# Start Redis
-redis-server
-```
-
-### 4. Bot Configuration
-1. Create Discord Application
-   - Visit Discord Developer Portal
-   - Create New Application
-   - Add Bot User
-   - Copy Bot Token
-
-2. Configure Bot Settings
-   - Update .env file with bot token
-   - Configure server settings
-   - Set up required channels
-
-### 5. Starting the Bot
-```bash
-# Development mode
-npm run dev
-
-# Production mode
-npm start
-```
+6. **Start the Bot**
+   ```bash
+   npm start
+   ```
 
 ## Post-Installation
+
+1. **Discord Channel Setup**
+   - Use `!set_command_channel #channel` for admin commands
+   - Use `!set_public_channel #channel` for public commands
+   - Use `!set_log_channel #channel` for bot logs
+
+2. **Configure Features**
+   - Set up shop items in `config/shop.json`
+   - Configure wheel rewards in `config/wheel.json`
+   - Add custom death messages in `config/death_messages.json`
+
+## Troubleshooting
+- Check logs in `logs/` directory
+- Verify RCON connection
+- Ensure correct permissions in Discord
 
 ### Verify Installation
 1. Check bot online status in Discord

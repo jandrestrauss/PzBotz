@@ -2,11 +2,15 @@
 
 ## Production Setup
 
+### Prerequisites
+- Node.js 16+
+- PM2 or similar process manager
+- Windows Server 2019/2022
+
 ### System Requirements
 - 2GB RAM minimum
 - 2 CPU cores
 - 20GB disk space
-- Windows Server 2019/2022
 
 ### Environment Setup
 1. Install Required Software
@@ -26,54 +30,38 @@
    ```
 
 ### Deployment Steps
+```bash
+# Clone repository
+git clone https://github.com/yourusername/PzBotz.git
 
-1. Build Application
-   ```bash
-   npm run build
-   ```
+# Install dependencies
+npm ci --production
 
-2. Configure PM2
-   ```javascript
-   // ecosystem.config.js
-   module.exports = {
-     apps: [{
-       name: "pzbot",
-       script: "./bot.js",
-       env: {
-         NODE_ENV: "production"
-       },
-       log_date_format: "YYYY-MM-DD HH:mm:ss",
-       error_file: "logs/error.log",
-       out_file: "logs/output.log"
-     }]
-   }
-   ```
+# Configure environment
+cp .env.example .env
+# Edit .env with production values
 
-3. Start Application
-   ```bash
-   pm2 start ecosystem.config.js
-   ```
+# Start with PM2
+pm2 start ecosystem.config.js
+```
 
 ### Monitoring
-1. PM2 Dashboard
-   ```bash
-   pm2 monit
-   ```
+```bash
+# View logs
+pm2 logs PzBotz
 
-2. Log Management
-   ```bash
-   # View logs
-   pm2 logs pzbot
+# Monitor status
+pm2 monit
 
-   # Rotate logs
-   pm2 logrotate -u 'dd-MM-yyyy'
-   ```
+# Check health
+pm2 status
+```
 
 ### Backup Strategy
-1. Database Backups
-2. Configuration Backups
-3. Log Archives
-4. Server World Backups
+- Automated daily backups
+- Weekly full backups
+- Monthly archives
+- Verification checks
 
 ## Payment Integration Deployment
 

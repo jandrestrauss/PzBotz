@@ -135,3 +135,54 @@ ws.onmessage = (event) => {
 - Endpoint: `/api/users`
 - Method: GET, POST, PUT, DELETE
 - Description: Manage users in the system.
+
+# API Documentation
+
+## Services
+
+### PointsSystem
+```javascript
+const pointsSystem = require('../services/pointsSystem');
+
+// Get points
+await pointsSystem.getPoints(userId);
+
+// Add points
+await pointsSystem.addPoints(userId, amount);
+
+// Remove points
+await pointsSystem.removePoints(userId, amount);
+```
+
+### GameDataSync
+```javascript
+const gameDataSync = require('../services/gameDataSync');
+
+// Get player stats
+const stats = gameDataSync.getPlayerStats(username);
+
+// Force sync
+await gameDataSync.syncGameData();
+```
+
+### Performance Monitoring
+```javascript
+const monitor = require('../services/healthMonitor');
+
+// Get current stats
+const stats = monitor.getStatus();
+
+// Run health check
+await monitor.runHealthChecks();
+```
+
+## Events
+```javascript
+monitor.on('healthCheckFailed', (data) => {
+  console.log(`Health check failed: ${data.name}`);
+});
+
+gameDataSync.on('pointsMismatch', (data) => {
+  console.log(`Points mismatch for ${data.userId}`);
+});
+```

@@ -1,28 +1,56 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const app = require('./app');
 const logger = require('./utils/logger');
+const bot = require('./bot');
+const monitorService = require('./services/monitorService');
+const backupService = require('./services/backupService');
+const gameDataSync = require('./services/gameDataSync');
+const errorRecovery = require('./services/errorRecovery');
 
-// Ensure required directories exist
-['logs', 'backups', 'config'].forEach(dir => {
-    const dirPath = path.join(__dirname, '..', dir);
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
+async function initialize() {
+    // Create required directories
+    ['logs', 'backups', 'data', 'config'].forEach(dir => {
+        const dirPath = path.join(__dirname, '..', dir);
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+    });
+
+    // Validate bot token
+    const tokenPath = path.join(__dirname, '../bot_token.txt');
+    if (!fs.existsSync(tokenPath)) {
+        logger.error('bot_token.txt not found. Please create this file with your bot token.');
+        process.exit(1);
     }
-});
 
-// Read bot token
-const tokenPath = path.join(__dirname, '../bot_token.txt');
-if (!fs.existsSync(tokenPath)) {
-    logger.error('bot_token.txt not found');
-    process.exit(1);
+    process.env.DISCORD_TOKEN = fs.readFileSync(tokenPath, 'utf8').trim();
+
+    try {
+        await bot.start();
+        monitorService.start();
+        backupService.start();
+        gameDataSync.start();
+        
+        logger.logEvent('Bot initialized successfully');
+    } catch (error) {
+        logger.error('Failed to initialize bot:', error);
+        process.exit(1);
+    }
 }
 
-process.env.DISCORD_TOKEN = fs.readFileSync(tokenPath, 'utf8').trim();
+// Handle errors
+process.on('uncaughtException', error => {
+    logger.error('Uncaught exception:', error);
+    errorRecovery.handleError('uncaughtException', error);
+});
 
-// Start application
-app.start();
+process.on('unhandledRejection', error => {
+    logger.error('Unhandled rejection:', error);
+    errorRecovery.handleError('unhandledRejection', error);
+});
+
+initialize();
 
 import React from 'react';
 import ReactDOM from 'react-dom';

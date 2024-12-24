@@ -1,6 +1,12 @@
 # Troubleshooting Guide
 
-## Common Issues and Solutions
+## Common Issues
+
+### Bot Not Responding
+1. Check bot token
+2. Verify Discord permissions
+3. Check channel configurations
+4. Review log files
 
 ### Connection Issues
 1. RCON Connection Failures
@@ -37,6 +43,24 @@
      redis-cli flushall
      ```
 
+### RCON Connection Failed
+```log
+Error: RCON connection failed
+```
+Solutions:
+1. Verify RCON password
+2. Check server firewall
+3. Confirm server is running
+
+### Points Sync Issues
+```log
+Points mismatch detected
+```
+Solutions:
+1. Check game server connection
+2. Verify player data
+3. Run manual sync: `!sync_points`
+
 ### Performance Issues
 
 1. High Memory Usage
@@ -63,6 +87,16 @@
    - Optimize queries
    - Check indexes
    - Monitor connection pool
+
+- High CPU Usage:
+  1. Check server load
+  2. Review backup schedule
+  3. Adjust monitoring intervals
+
+- Memory Leaks:
+  1. Check log files
+  2. Restart bot service
+  3. Update Node.js
 
 ## New Scenarios
 
@@ -108,6 +142,12 @@
    npm run logs:commands
    ```
 
+## Log Files
+Location: `logs/`
+- `app.log` - General application logs
+- `error.log` - Error messages
+- `debug.log` - Debug information
+
 ## Recovery Procedures
 
 1. Bot Crash Recovery
@@ -125,8 +165,19 @@
    npm run cache:clear
    ```
 
+## Recovery Steps
+1. Stop bot: `Ctrl+C`
+2. Clear temporary files
+3. Restart bot: `npm start`
+
 ## Support Resources
 
 - Discord Support Server: [Join Here]
 - GitHub Issues: [Report Bug]
 - Documentation: [View Docs]
+
+## Support
+Create GitHub issue with:
+1. Log files
+2. Configuration (sanitized)
+3. Steps to reproduce

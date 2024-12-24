@@ -4,28 +4,38 @@
 A Windows-only Discord bot for managing Project Zomboid servers with RCON support, automated backups, and monitoring.
 
 ## Features
-- Auto server restart management
-- Server performance monitoring (RAM/CPU)
+- Auto server restart and monitoring
+- Points system with in-game synchronization
+- Shop system with customizable items
+- Wheel spins event system
+- Death message system with custom messages
+- Performance monitoring and charts
 - Automated backup system
-- Discord command interface
-- RCON command execution
-- Player management
-- Real-time server metrics
-- File-based configuration
-- Windows-optimized
+- Log analysis and health monitoring
+- Multi-language support
+- Windows-optimized for PZ servers
 
 ## Prerequisites
 - Windows OS
-- Node.js 16 or higher
+- Node.js 16+
 - .NET Framework 4.7.2
 - Project Zomboid Dedicated Server
+- Discord Bot Token
 
-## Installation
+## Quick Start
+1. Download latest release
+2. Extract to Project Zomboid Server directory
+3. Rename server start file to `server.bat`
+4. Create `bot_token.txt` with your Discord bot token
+5. Run `npm install`
+6. Start with `npm start`
 
-1. Download the latest release
-2. Extract to your Project Zomboid Dedicated Server folder
-3. Rename your server startup file to `server.bat`
-4. Create `bot_token.txt` and paste your Discord bot token
+## Configuration Files
+- `config/shop.json` - Shop items configuration
+- `config/wheel.json` - Wheel spin rewards
+- `config/death_messages.json` - Custom death messages
+- `data/points.json` - Points storage
+- `.env` - Environment configuration
 
 ## Configuration
 
@@ -45,23 +55,43 @@ BACKUP_PATH=/path/to/backups
 
 ## Commands
 
-### Public Channel
-- `!bot_info` - Display bot information
+### Public Commands
+- `!points` - Check your points
+- `!shop` - View shop items
+- `!buy <item>` - Purchase items
+- `!wheelspin` - Spin for rewards
 - `!server_status` - Check server status
-- `!restart_time` - View next restart time
-- `!game_date` - Show in-game date
 
-### Admin Channel
-- `!set_command_channel` - Set admin channel
-- `!set_log_channel` - Set logging channel
-- `!set_public_channel` - Set public channel
-- `!backup_server` - Create server backup
-- `!get_ram_cpu` - Show resource usage
-- `!restart_server` - Restart the server
+### Admin Commands
+- `!performance` - View performance charts
+- `!backup` - Create server backup
+- `!health` - Server health status
+- `!config` - Manage server settings
+
+## Directory Structure
+```
+/
+├── config/           # Configuration files
+├── data/            # Data storage
+├── docs/            # Documentation
+├── logs/            # Application logs
+├── src/             # Source code
+└── backups/         # Server backups
+```
+
+## Documentation
+See the [docs](./docs) directory for detailed guides:
+- [Installation Guide](./docs/installation.md)
+- [Configuration Guide](./docs/configuration.md)
+- [Admin Guide](./docs/admin.md)
+- [API Reference](./docs/api.md)
+- [Troubleshooting](./docs/troubleshooting.md)
 
 ## Support
-- For issues, create a GitHub issue
-- Reference the docs folder for detailed guides
+Create an issue for:
+- Bug reports
+- Feature requests
+- Documentation improvements
 
 ## Limitations
 - Windows OS only
