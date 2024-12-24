@@ -1,61 +1,90 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
-const { Client } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 class DeathMessageService {
     constructor() {
-        this.messagesPath = path.join(process.cwd(), 'config', 'death_messages.json');
+        this.configPath = path.join(process.cwd(), 'config', 'death_messages.json');
         this.messages = [];
-        this.deathLogPath = path.join(process.cwd(), 'Zomboid', 'Logs', 'deaths.txt');
         this.loadMessages();
+        this.logFile = path.join(process.cwd(), 'Zomboid', 'Logs', 'deaths.txt');
+        this.lastRead = 0;
     }
 
     loadMessages() {
         try {
-            if (fs.existsSync(this.messagesPath)) {
-                this.messages = JSON.parse(fs.readFileSync(this.messagesPath, 'utf8'));
+            if (fs.existsSync(this.configPath)) {
+                this.messages = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
             }
         } catch (error) {
-            logger.error('Error loading death messages:', error);
+            logger.error('Failed to load death messages:', error);
         }
     }
 
-    getRandomMessage(playerName, causeOfDeath) {
-        if (this.messages.length === 0) return `${playerName} has died from ${causeOfDeath}`;
-        const message = this.messages[Math.floor(Math.random() * this.messages.length)];
-        return message.replace('{player}', playerName).replace('{cause}', causeOfDeath);
-    }
+    startWatching(discordClient, channelId) {
+        if (!fs.existsSync(this.logFile)) {
+            logger.error('Death log file not found:', this.logFile);
+            return;
+        }
 
-    watchDeathLog(channelId, client) {
-        fs.watchFile(this.deathLogPath, async (curr, prev) => {
-            if (curr.mtime > prev.mtime) {
-                try {
-                    const content = fs.readFileSync(this.deathLogPath, 'utf8');
-                    const newDeaths = this.parseNewDeaths(content);
-                    await this.announceDeaths(newDeaths, channelId, client);
-                } catch (error) {
-                    logger.error('Error processing death log:', error);
-                }
-            }
+        fs.watchFile(this.logFile, () => {
+            this.checkNewDeaths(discordClient, channelId);
         });
+
+        logger.logEvent('Death message service started');
     }
 
-    parseNewDeaths(content) {
-        // Implement death log parsing based on PZ log format
+    async checkNewDeaths(discordClient, channelId) {
+        try {
+            const stats = fs.statSync(this.logFile);
+            if (stats.size <= this.lastRead) return;
+
+            const content = fs.readFileSync(this.logFile, 'utf8');
+            const newContent = content.slice(this.lastRead);
+            this.lastRead = stats.size;
+
+            const deaths = this.parseDeaths(newContent);
+            await this.announceDeaths(deaths, discordClient, channelId);
+        } catch (error) {
+            logger.error('Error checking deaths:', error);
+        }
+    }
+
+    parseDeaths(content) {
         const deaths = [];
-        // Parse logic here
+        const deathRegex = /(\w+) (died|was killed) by (.+)/g;
+        let match;
+
+        while ((match = deathRegex.exec(content)) !== null) {
+            deaths.push({
+                player: match[1],
+                cause: match[3]
+            });
+        }
+
         return deaths;
     }
 
-    async announceDeaths(deaths, channelId, client) {
-        const channel = await client.channels.fetch(channelId);
+    async announceDeaths(deaths, discordClient, channelId) {
+        const channel = await discordClient.channels.fetch(channelId);
         if (!channel) return;
 
         for (const death of deaths) {
-            const message = this.getRandomMessage(death.player, death.cause);
-            await channel.send(message);
+            const message = this.getRandomMessage(death);
+            const embed = new MessageEmbed()
+                .setTitle('💀 Death Report')
+                .setDescription(message)
+                .setColor('#ff0000')
+                .setTimestamp();
+
+            await channel.send({ embeds: [embed] });
         }
+    }
+
+    getRandomMessage({ player, cause }) {
+        const message = this.messages[Math.floor(Math.random() * this.messages.length)];
+        return message.replace('{player}', player).replace('{cause}', cause);
     }
 }
 

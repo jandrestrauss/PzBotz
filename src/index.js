@@ -7,6 +7,7 @@ const monitorService = require('./services/monitorService');
 const backupService = require('./services/backupService');
 const gameDataSync = require('./services/gameDataSync');
 const errorRecovery = require('./services/errorRecovery');
+const applicationManager = require('./core/applicationManager');
 
 async function initialize() {
     // Create required directories
@@ -27,14 +28,12 @@ async function initialize() {
     process.env.DISCORD_TOKEN = fs.readFileSync(tokenPath, 'utf8').trim();
 
     try {
+        await applicationManager.start();
         await bot.start();
-        monitorService.start();
-        backupService.start();
-        gameDataSync.start();
         
-        logger.logEvent('Bot initialized successfully');
+        logger.logEvent('Application initialized successfully');
     } catch (error) {
-        logger.error('Failed to initialize bot:', error);
+        logger.error('Failed to initialize application:', error);
         process.exit(1);
     }
 }
@@ -42,12 +41,21 @@ async function initialize() {
 // Handle errors
 process.on('uncaughtException', error => {
     logger.error('Uncaught exception:', error);
-    errorRecovery.handleError('uncaughtException', error);
+    applicationManager.getService('events')
+        .handleEvent('uncaughtException', { error });
 });
 
 process.on('unhandledRejection', error => {
     logger.error('Unhandled rejection:', error);
-    errorRecovery.handleError('unhandledRejection', error);
+    applicationManager.getService('events')
+        .handleEvent('unhandledRejection', { error });
+});
+
+// Add graceful shutdown
+process.on('SIGTERM', async () => {
+    logger.logEvent('Received SIGTERM signal');
+    await applicationManager.stop();
+    process.exit(0);
 });
 
 initialize();

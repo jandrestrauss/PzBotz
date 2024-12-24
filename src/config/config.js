@@ -1,16 +1,40 @@
+const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
 
-const config = {
-  development: {
-    paths: {
-      backups: process.env.BACKUP_PATH || path.join(__dirname, '../../backups'),
-      logs: path.join(__dirname, '../../logs')
+class ConfigManager {
+    constructor() {
+        this.configPath = path.join(process.cwd(), 'config', 'config.json');
+        this.config = {};
+        this.loadConfig();
     }
-  },
-  production: {
-    // Production config will inherit from development
-  }
-};
 
-module.exports = config;
+    loadConfig() {
+        try {
+            if (fs.existsSync(this.configPath)) {
+                this.config = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+            }
+        } catch (error) {
+            logger.error('Failed to load configuration:', error);
+        }
+    }
+
+    saveConfig() {
+        try {
+            fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2));
+        } catch (error) {
+            logger.error('Failed to save configuration:', error);
+        }
+    }
+
+    get(key) {
+        return this.config[key];
+    }
+
+    set(key, value) {
+        this.config[key] = value;
+        this.saveConfig();
+    }
+}
+
+module.exports = new ConfigManager();

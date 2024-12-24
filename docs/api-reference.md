@@ -40,6 +40,38 @@ await server.backup();
 await server.clean();
 ```
 
+## Services
+
+### ApplicationManager
+```javascript
+const applicationManager = require('./core/applicationManager');
+
+// Get service instance
+const service = applicationManager.getService('serviceName');
+
+// Get application status
+const status = applicationManager.getStatus();
+```
+
+### EventManager
+```javascript
+const eventManager = require('./services/eventManager');
+
+// Subscribe to events
+eventManager.subscribe('eventName', callback);
+
+// Emit events
+eventManager.handleEvent('eventName', data);
+```
+
+### MonitoringService
+```javascript
+const monitoringService = require('./services/monitoringService');
+
+// Get current metrics
+const metrics = monitoringService.getMetrics();
+```
+
 ## Events
 ```javascript
 // Points events
@@ -55,6 +87,13 @@ server.on('backup', (status) => {});
 monitor.on('warning', (metric) => {});
 monitor.on('critical', (metric) => {});
 ```
+
+## WebSocket Events
+| Event | Description | Payload |
+|-------|-------------|---------|
+| metrics | Server metrics update | `{ cpu, memory, players }` |
+| alert | System alert | `{ type, message, severity }` |
+| status | Server status change | `{ status, timestamp }` |
 
 ## Error Handling
 ```javascript

@@ -1,42 +1,38 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
+const BaseService = require('./BaseService');
 const rconService = require('./rconService');
 
-class WheelSpinService {
+class WheelSpinService extends BaseService {
     constructor() {
-        this.configPath = path.join(process.cwd(), 'config', 'wheel.json');
-        this.rewards = [];
-        this.loadRewards();
-    }
-
-    loadRewards() {
-        try {
-            if (fs.existsSync(this.configPath)) {
-                this.rewards = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
-            }
-        } catch (error) {
-            logger.error('Error loading wheel rewards:', error);
-        }
+        super('WheelSpin', 'wheel.json');
     }
 
     async spin(username) {
-        if (this.rewards.length === 0) {
-            throw new Error('No rewards configured');
-        }
+        const rewards = Array.from(this.data.values());
+        if (rewards.length === 0) throw new Error('No rewards configured');
 
-        const reward = this.rewards[Math.floor(Math.random() * this.rewards.length)];
+        const reward = this.getRandomReward(rewards);
         try {
             await rconService.execute(`additem "${username}" "${reward.id}" ${reward.quantity}`);
+            this.emit('spinComplete', { username, reward });
             return reward;
         } catch (error) {
-            logger.error(`Failed to give reward to ${username}:`, error);
+            this.emit('spinFailed', { username, error });
             throw error;
         }
     }
 
-    getRewards() {
-        return this.rewards;
+    getRandomReward(rewards) {
+        const totalWeight = rewards.reduce((sum, r) => sum + (r.weight || 1), 0);
+        let random = Math.random() * totalWeight;
+        
+        for (const reward of rewards) {
+            random -= (reward.weight || 1);
+            if (random <= 0) return reward;
+        }
+        return rewards[0];
     }
 }
 

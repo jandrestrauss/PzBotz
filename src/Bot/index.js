@@ -13,6 +13,7 @@ class DiscordBot {
         });
         
         this.messageHandler = require('./messageHandler');
+        this.applicationManager = require('../core/applicationManager');
         this.setupEventHandlers();
     }
 
@@ -26,9 +27,20 @@ class DiscordBot {
         });
 
         this.client.on('messageCreate', (message) => {
-            this.messageHandler.handle(message).catch(error => {
-                logger.error('Message handling error:', error);
-            });
+            const startTime = Date.now();
+            this.messageHandler.handle(message)
+                .then(success => {
+                    this.applicationManager.getService('analytics')
+                        .trackCommand({
+                            command: message.content.split(' ')[0],
+                            userId: message.author.id,
+                            success,
+                            duration: Date.now() - startTime
+                        });
+                })
+                .catch(error => {
+                    logger.error('Message handling error:', error);
+                });
         });
     }
 

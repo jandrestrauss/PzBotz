@@ -12,22 +12,25 @@
 - 2 CPU cores
 - 20GB disk space
 
-### Environment Setup
-1. Install Required Software
-   ```bash
-   # Install Node.js LTS
-   # Install PM2 globally
-   npm install -pm2 -g
-   ```
+### Environment Preparation
+```bash
+# Install required tools
+npm install -g pm2 windows-build-tools
 
-2. Configure Services
-   ```bash
-   # Create service definitions
-   pm2 ecosystem
+# Configure environment
+copy .env.example .env
+notepad .env
+```
 
-   # Configure startup
-   pm2 startup
-   ```
+### Service Installation
+```powershell
+# Install as Windows service
+npm run install-service
+
+# Configure service
+sc config PZBotz start= auto
+sc description PZBotz "Project Zomboid Discord Bot"
+```
 
 ### Deployment Steps
 ```bash
@@ -43,6 +46,22 @@ cp .env.example .env
 
 # Start with PM2
 pm2 start ecosystem.config.js
+```
+
+### Monitoring Setup
+```javascript
+// PM2 configuration
+module.exports = {
+    apps: [{
+        name: 'pzbotz',
+        script: './src/index.js',
+        env: {
+            NODE_ENV: 'production'
+        },
+        instances: 1,
+        autorestart: true
+    }]
+};
 ```
 
 ### Monitoring
@@ -62,6 +81,20 @@ pm2 status
 - Weekly full backups
 - Monthly archives
 - Verification checks
+
+## Maintenance
+
+### Updates
+1. Backup configuration
+2. Stop service
+3. Update files
+4. Verify config
+5. Start service
+
+### Logs
+- Application: `logs/app.log`
+- Errors: `logs/error.log`
+- Access: `logs/access.log`
 
 ## Payment Integration Deployment
 

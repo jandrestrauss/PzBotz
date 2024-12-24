@@ -6,6 +6,12 @@ const DiscordBot = require('../discord/bot');
 const WebSocketManager = require('../websocket/wsManager');
 const DatabaseManager = require('../database/connectionManager');
 const HealthCheck = require('./healthCheck');
+const eventManager = require('../services/eventManager');
+const monitoringService = require('../services/monitoringService');
+const analyticsService = require('../services/analyticsService');
+const webSocketServer = require('../services/webSocketServer');
+const reportGenerator = require('../services/reportGenerator');
+const jobScheduler = require('../services/jobScheduler');
 
 class ApplicationManager extends EventEmitter {
     constructor() {
@@ -13,6 +19,21 @@ class ApplicationManager extends EventEmitter {
         this.services = new Map();
         this.isInitialized = false;
         this.performanceMonitor = new PerformanceMonitor();
+        this.setupServices();
+    }
+
+    setupServices() {
+        this.services.set('events', eventManager);
+        this.services.set('monitoring', monitoringService);
+        this.services.set('analytics', analyticsService);
+        this.services.set('websocket', webSocketServer);
+        this.services.set('reports', reportGenerator);
+        this.services.set('jobs', jobScheduler);
+
+        // Schedule daily report generation
+        jobScheduler.schedule('dailyReport', '0 0 * * *', async () => {
+            await reportGenerator.generateDailyReport();
+        });
     }
 
     async initialize() {
@@ -38,6 +59,25 @@ class ApplicationManager extends EventEmitter {
         }
     }
 
+    async start() {
+        logger.logEvent('Starting application services...');
+
+        try {
+            monitoringService.start();
+            await webSocketServer.start();
+            
+            // Register event listeners
+            eventManager.on('warning', (data) => {
+                logger.warn('System warning:', data);
+            });
+
+            logger.logEvent('All services started successfully');
+        } catch (error) {
+            logger.error('Failed to start services:', error);
+            throw error;
+        }
+    }
+
     async shutdown() {
         logger.info('Starting graceful shutdown...');
         for (const [name, service] of this.services) {
@@ -50,6 +90,36 @@ class ApplicationManager extends EventEmitter {
                 logger.error(`Error shutting down ${name}:`, error);
             }
         }
+    }
+
+    async stop() {
+        logger.logEvent('Stopping application services...');
+
+        for (const [name, service] of this.services) {
+            if (service.stop) {
+                try {
+                    await service.stop();
+                    logger.logEvent(`Stopped service: ${name}`);
+                } catch (error) {
+                    logger.error(`Error stopping service ${name}:`, error);
+                }
+            }
+        }
+    }
+
+    getService(name) {
+        return this.services.get(name);
+    }
+
+    getStatus() {
+        const status = {};
+        for (const [name, service] of this.services) {
+            status[name] = {
+                running: !!service.isRunning,
+                status: service.getStatus?.() || 'Unknown'
+            };
+        }
+        return status;
     }
 
     setupErrorHandlers() {

@@ -2,6 +2,43 @@
 
 ## Common Issues
 
+### Bot Connection
+```bash
+# Check bot token
+cat bot_token.txt
+# Verify permissions in Discord
+# Review logs
+tail -f logs/app.log
+```
+
+### RCON Issues
+```bash
+# Test RCON connection
+npm run test:rcon
+# Check server status
+npm run server:status
+```
+
+### Performance Problems
+1. High CPU Usage
+   - Check monitoring dashboard
+   - Review active tasks
+   - Analyze log patterns
+
+2. Memory Leaks
+   - Use monitoring tools
+   - Check heap usage
+   - Review service states
+
+## Error Codes
+| Code | Description | Solution |
+|------|-------------|----------|
+| E001 | Token Invalid | Regenerate token |
+| E002 | RCON Failed | Check credentials |
+| E003 | Backup Failed | Check permissions |
+
+## Common Issues
+
 ### Bot Not Responding
 1. Check bot token
 2. Verify Discord permissions

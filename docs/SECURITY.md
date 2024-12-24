@@ -1,182 +1,51 @@
 # Security Guide
 
-## Authentication
+## Core Security Measures
 
-### Discord OAuth2
-1. Authorization flow
-2. Token management
-3. Permission scopes
-
-### API Keys
-- Generation
-- Rotation schedule
-- Access levels
-
-## Rate Limiting
-
-### Standard Limits
+### Authentication
 ```javascript
-{
-    "api": {
-        "window": "5m",
-        "max": 100
-    },
-    "websocket": {
-        "window": "1m",
-        "max": 60
-    },
-    "admin": {
-        "window": "1h",
-        "max": 1000
-    }
+// Token Management
+TOKEN_ROTATION_DAYS = 30
+TOKEN_ENCRYPTION = 'AES-256-GCM'
+
+// Permission Levels
+PERMISSION_LEVELS = {
+    USER: 0,
+    MOD: 1,
+    ADMIN: 2,
+    OWNER: 3
 }
 ```
 
-## Data Protection
-
-### Sensitive Data
-- User IDs
-- Server credentials
-- Authentication tokens
-- Player statistics
-
-### Storage Security
-1. Encryption at rest
-2. Secure configuration
-3. Access logs
-4. Backup encryption
-
-## Payment Security
-
-### Data Protection
-1. Card Data Handling
-2. PCI DSS Compliance
-3. Data Encryption
-4. Access Controls
-
-### Transaction Security
+### Rate Limiting
 ```json
 {
-  "requirements": {
-    "ssl": "Required",
-    "apiAuthentication": "Bearer Token",
-    "webhookSigning": "Required",
-    "ipWhitelist": "Optional"
-  },
-  "encryption": {
-    "inTransit": "TLS 1.2+",
-    "atRest": "AES-256"
-  }
-}
-```
-
-```typescript
-interface SecurityConfig {
-    encryption: {
-        algorithm: 'AES-256-GCM',
-        keyRotationDays: 30,
-        saltRounds: 10
+    "global": {
+        "windowMs": 300000,
+        "max": 100
     },
-    validation: {
-        maxRetries: 3,
-        lockoutMinutes: 15,
-        requireVerification: true
-    },
-    monitoring: {
-        rateLimit: 10,
-        suspiciousAmount: 5000,
-        requireApproval: true
+    "commands": {
+        "windowMs": 60000,
+        "max": 10
     }
 }
 ```
 
-### Access Control
-```typescript
-const PAYMENT_ROLES = {
-    ADMIN: ['MANAGE_PAYMENTS', 'VIEW_TRANSACTIONS', 'PROCESS_REFUNDS'],
-    SUPPORT: ['VIEW_TRANSACTIONS', 'PROCESS_REFUNDS'],
-    USER: ['CREATE_TRANSACTION', 'VIEW_OWN_TRANSACTIONS']
-};
-```
-
-### Audit Requirements
-1. All payment attempts
-2. Administrative actions
-3. Points modifications
-4. Security events
-5. API access logs
-
-### Security Measures
-- Request Signing
-- IP Whitelisting
-- Rate Limiting
-- Audit Logging
-- Fraud Detection
-
-### Incident Response
-1. Transaction Suspension
-2. Provider Notification
-3. System Isolation
-4. Customer Alert
-5. Recovery Plan
+### File Security
+- Bot token stored in separate file
+- Configuration encryption
+- Secure backup storage
+- Audit logging
 
 ## Best Practices
-
-### Server Security
-1. RCON password requirements
-2. Regular password rotation
-3. IP whitelisting
-4. SSL/TLS configuration
-
-### Monitoring
-1. Failed login attempts
-2. Rate limit breaches
-3. Unusual activity patterns
-4. Server health metrics
-
-## Configuration Security
-
-### Environment Variables
-- Never commit .env files
-- Use strong passwords
-- Rotate secrets regularly
-- Encrypt sensitive data
-
-### File Permissions
-```bash
-# Set correct permissions
-chmod 600 config/*.json
-chmod 600 .env
-chmod 600 bot_token.txt
-```
-
-## Bot Token Security
-- Store token in bot_token.txt
-- Never share or expose token
-- Rotate token if compromised
-- Use token environment variable
-
-## RCON Security
-- Use strong passwords
-- Change default ports
-- Restrict IP access
-- Enable SSL/TLS
-
-## Points System Security
-- Validate all inputs
-- Check permissions
-- Log all transactions
-- Regular audits
-- Sync verification
-
-## Backup Security
-- Encrypt backups
-- Secure storage
-- Regular testing
-- Access controls
+1. Regular token rotation
+2. Encrypted configuration
+3. Secure RCON connection
+4. Permission validation
+5. Input sanitization
 
 ## Monitoring
-- Log access attempts
-- Track command usage
-- Monitor file changes
-- Alert on suspicious activity
+- Failed login attempts
+- Command abuse detection
+- Resource usage alerts
+- Permission violations

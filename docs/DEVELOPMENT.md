@@ -1,12 +1,13 @@
 # Development Guide
 
-## Project Structure
+## Architecture Overview
 ```
 src/
-├── commands/      # Bot commands
-├── services/      # Core services
-├── utils/         # Utilities
-└── monitoring/    # Monitoring systems
+├── core/           # Core application components
+├── services/       # Service implementations
+├── utils/          # Utility functions
+├── bot/           # Discord bot implementation
+└── monitoring/    # System monitoring
 ```
 
 ## Core Components
@@ -57,6 +58,31 @@ docker-compose up -d mongodb
 npm run dev
 ```
 
+## Adding New Features
+
+### 1. Service Implementation
+```javascript
+class NewService {
+    constructor() {
+        this.initialize();
+    }
+
+    async start() {
+        // Implementation
+    }
+
+    async stop() {
+        // Cleanup
+    }
+}
+```
+
+### 2. Register with ApplicationManager
+```javascript
+// In applicationManager.js
+this.services.set('newService', new NewService());
+```
+
 ## Adding New Commands
 1. Create command file in `src/commands/`
 2. Extend base Command class
@@ -76,6 +102,18 @@ class NewCommand extends Command {
 }
 ```
 
+## Event System
+Events use a publish-subscribe pattern:
+```javascript
+// Subscribe to events
+eventManager.subscribe('eventName', (data) => {
+    // Handle event
+});
+
+// Publish events
+eventManager.handleEvent('eventName', data);
+```
+
 ## Services
 - Use dependency injection
 - Implement event emitters
@@ -89,14 +127,9 @@ class NewCommand extends Command {
 
 ## Testing
 ```bash
-# Run all tests
-npm test
-
-# Run specific suite
-npm test -- --grep "Service Tests"
-
-# Coverage report
-npm run coverage
+npm test               # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Generate coverage
 ```
 
 ## Deployment

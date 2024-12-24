@@ -7,62 +7,100 @@ const EventEmitter = require('events');
 class LogAnalyzer extends EventEmitter {
     constructor() {
         super();
-        this.patterns = {
-            error: /error|exception|failed/i,
-            warning: /warning|warn/i,
-            crash: /crash|fatal|terminated/i,
-            playerAction: /player.*(connected|disconnected|died)/i
+        this.logPatterns = {
+            error: /\b(error|exception|failed|crash)\b/i,
+            warning: /\b(warning|warn)\b/i,
+            playerAction: /Player '([^']+)' (connected|disconnected|died)/,
+            serverEvent: /\b(started|stopped|saved|backup)\b/i
         };
-        this.serverLogPath = path.join(process.cwd(), 'Zomboid', 'server-console.txt');
+        this.stats = {
+            errors: 0,
+            warnings: 0,
+            playerEvents: 0,
+            serverEvents: 0
+        };
     }
 
-    async analyze() {
-        try {
-            const stats = {
-                errors: 0,
-                warnings: 0,
-                crashes: 0,
-                playerActions: []
-            };
+    async analyzeLogs(days = 1) {
+        const logDir = path.join(process.cwd(), 'Zomboid', 'Logs');
+        const currentDate = new Date();
+        const files = await this.getRecentLogFiles(logDir, days);
 
-            const fileStream = fs.createReadStream(this.serverLogPath);
-            const rl = readline.createInterface({
-                input: fileStream,
-                crlfDelay: Infinity
-            });
+        this.resetStats();
+        for (const file of files) {
+            await this.analyzeFile(file);
+        }
 
-            for await (const line of rl) {
-                this.analyzeLine(line, stats);
+        return {
+            stats: this.stats,
+            timestamp: currentDate,
+            analyzedFiles: files.length
+        };
+    }
+
+    async getRecentLogFiles(dir, days) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - days);
+
+        const files = await fs.promises.readdir(dir);
+        return files
+            .map(file => ({
+                name: file,
+                path: path.join(dir, file),
+                mtime: fs.statSync(path.join(dir, file)).mtime
+            }))
+            .filter(file => file.mtime > cutoff)
+            .map(file => file.path);
+    }
+
+    async analyzeFile(filePath) {
+        const fileStream = fs.createReadStream(filePath);
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+
+        for await (const line of rl) {
+            this.analyzeLine(line);
+        }
+    }
+
+    analyzeLine(line) {
+        for (const [type, pattern] of Object.entries(this.logPatterns)) {
+            if (pattern.test(line)) {
+                this.handleMatch(type, line);
             }
-
-            this.emit('analysisComplete', stats);
-            return stats;
-        } catch (error) {
-            logger.error('Log analysis failed:', error);
-            throw error;
         }
     }
 
-    analyzeLine(line, stats) {
-        if (this.patterns.error.test(line)) {
-            stats.errors++;
-            this.emit('error', line);
+    handleMatch(type, line) {
+        switch(type) {
+            case 'error':
+                this.stats.errors++;
+                this.emit('error', { line, timestamp: new Date() });
+                break;
+            case 'warning':
+                this.stats.warnings++;
+                this.emit('warning', { line, timestamp: new Date() });
+                break;
+            case 'playerAction':
+                this.stats.playerEvents++;
+                this.emit('playerAction', { line, timestamp: new Date() });
+                break;
+            case 'serverEvent':
+                this.stats.serverEvents++;
+                this.emit('serverEvent', { line, timestamp: new Date() });
+                break;
         }
-        if (this.patterns.warning.test(line)) {
-            stats.warnings++;
-            this.emit('warning', line);
-        }
-        if (this.patterns.crash.test(line)) {
-            stats.crashes++;
-            this.emit('crash', line);
-        }
-        if (this.patterns.playerAction.test(line)) {
-            stats.playerActions.push({
-                timestamp: new Date(),
-                action: line
-            });
-            this.emit('playerAction', line);
-        }
+    }
+
+    resetStats() {
+        this.stats = {
+            errors: 0,
+            warnings: 0,
+            playerEvents: 0,
+            serverEvents: 0
+        };
     }
 }
 
