@@ -102,4 +102,57 @@ class AdminDashboard {
     }
 }
 
+class AdminPanel {
+    constructor() {
+        this.setupEventHandlers();
+        this.loadServerStatus();
+    }
+
+    setupEventHandlers() {
+        document.getElementById('server-restart').onclick = () => this.confirmAction(
+            'Restart server?',
+            () => this.executeCommand('restart')
+        );
+
+        document.getElementById('create-backup').onclick = () => this.executeCommand('backup');
+
+        document.getElementById('update-config').onclick = () => {
+            const config = this.getConfigValues();
+            this.saveConfig(config);
+        };
+    }
+
+    async executeCommand(command, params = {}) {
+        try {
+            const response = await fetch(`/api/admin/${command}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+
+            if (!response.ok) throw new Error('Command failed');
+            
+            const result = await response.json();
+            this.showNotification(result.message);
+        } catch (error) {
+            this.showError('Command execution failed');
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.getElementById('notifications').prepend(notification);
+        setTimeout(() => notification.remove(), 5000);
+    }
+
+    confirmAction(message, callback) {
+        if (window.confirm(message)) {
+            callback();
+        }
+    }
+}
+
 const adminDashboard = new AdminDashboard();
+const adminPanel = new AdminPanel();

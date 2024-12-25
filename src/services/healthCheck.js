@@ -2,6 +2,8 @@ const os = require('os');
 const { exec } = require('child_process');
 const logger = require('../utils/logger');
 const EventEmitter = require('events');
+const performanceMonitor = require('../monitoring/performanceMonitor');
+const serviceIntegrator = require('../core/serviceIntegrator');
 
 class HealthCheck extends EventEmitter {
     constructor() {
@@ -116,6 +118,55 @@ class HealthCheck extends EventEmitter {
                 resolve(disks);
             });
         });
+    }
+
+    async checkHealth() {
+        const health = {
+            status: 'healthy',
+            services: {},
+            performance: performanceMonitor.getPerformanceReport(),
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            // Check all services
+            for (const [name, service] of serviceIntegrator.services) {
+                health.services[name] = await this.checkService(service);
+            }
+
+            // Set overall status
+            if (Object.values(health.services).some(s => s.status === 'critical')) {
+                health.status = 'critical';
+            } else if (Object.values(health.services).some(s => s.status === 'warning')) {
+                health.status = 'warning';
+            }
+
+        } catch (error) {
+            logger.error('Health check failed:', error);
+            health.status = 'critical';
+            health.error = error.message;
+        }
+
+        return health;
+    }
+
+    async checkService(service) {
+        const status = {
+            status: 'healthy',
+            lastCheck: new Date().toISOString()
+        };
+
+        try {
+            if (service.healthCheck) {
+                const serviceHealth = await service.healthCheck();
+                Object.assign(status, serviceHealth);
+            }
+        } catch (error) {
+            status.status = 'critical';
+            status.error = error.message;
+        }
+
+        return status;
     }
 }
 

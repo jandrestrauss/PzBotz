@@ -1,9 +1,14 @@
 const jwt = require('jsonwebtoken');
-const logger = require('../logging/logger');
+const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class TokenManager {
     constructor() {
         this.rateLimiter = new Map();
+        this.tokens = new Map();
+        this.algorithm = 'aes-256-gcm';
+        this.keyLength = 32;
+        this.secret = process.env.TOKEN_SECRET || crypto.randomBytes(32).toString('hex');
     }
 
     async checkRateLimit(key, limit = 100, window = 3600) {
@@ -43,6 +48,58 @@ class TokenManager {
             remaining: tokenBlacklist.size
         });
     }
+
+    generateToken(userId) {
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+
+        const tokenData = {
+            token,
+            userId,
+            expiresAt,
+            rotationCount: 0
+        };
+
+        this.tokens.set(token, tokenData);
+        return this.encryptToken(token);
+    }
+
+    encryptToken(token) {
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.secret), iv);
+        const encrypted = Buffer.concat([cipher.update(token), cipher.final()]);
+        const authTag = cipher.getAuthTag();
+
+        return {
+            token: encrypted.toString('hex'),
+            iv: iv.toString('hex'),
+            authTag: authTag.toString('hex')
+        };
+    }
+
+    validateToken(encryptedData) {
+        try {
+            const decipher = crypto.createDecipheriv(
+                this.algorithm,
+                Buffer.from(this.secret),
+                Buffer.from(encryptedData.iv, 'hex')
+            );
+            
+            decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'hex'));
+            const decrypted = Buffer.concat([
+                decipher.update(Buffer.from(encryptedData.token, 'hex')),
+                decipher.final()
+            ]);
+
+            const token = decrypted.toString();
+            const tokenData = this.tokens.get(token);
+
+            return tokenData && tokenData.expiresAt > Date.now();
+        } catch (error) {
+            logger.error('Token validation failed:', error);
+            return false;
+        }
+    }
 }
 
-module.exports = TokenManager;
+module.exports = new TokenManager();

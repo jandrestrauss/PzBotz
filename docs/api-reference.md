@@ -105,3 +105,37 @@ try {
     }
 }
 ```
+
+## Server Endpoints
+
+### Status Endpoints
+```http
+GET /api/server/status
+GET /api/server/players
+GET /api/server/metrics
+```
+
+### Command Endpoints
+```http
+POST /api/server/command
+```
+
+### Monitoring Endpoints
+```http
+GET /api/metrics/current
+GET /api/metrics/history
+GET /api/alerts
+```
+
+## Authentication
+```javascript
+// All requests must include:
+headers: {
+    'Authorization': 'Bearer <token>'
+}
+```
+
+## Rate Limits
+- 100 requests per 15 minutes for standard endpoints
+- 30 requests per minute for command endpoints
+- 1000 requests per hour for monitoring endpoints

@@ -1,0 +1,22 @@
+{
+    "memory": {
+        "heapLimit": "2048MB",
+        "gcInterval": 3600000,
+        "gcThreshold": 0.8
+    },
+    "cache": {
+        "maxSize": 1000,
+        "ttl": 300,
+        "checkPeriod": 600
+    },
+    "workers": {
+        "minInstances": 2,
+        "maxInstances": 4,
+        "idleTimeout": 30000
+    },
+    "metrics": {
+        "enabled": true,
+        "retentionDays": 7,
+        "sampleInterval": 60000
+    }
+}

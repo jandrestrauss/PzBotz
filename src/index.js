@@ -2,59 +2,49 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const logger = require('./utils/logger');
+const serviceIntegrator = require('./core/serviceIntegrator');
+const Dashboard = require('./dashboard');
 const bot = require('./bot');
-const monitorService = require('./services/monitorService');
-const backupService = require('./services/backupService');
-const gameDataSync = require('./services/gameDataSync');
-const errorRecovery = require('./services/errorRecovery');
-const applicationManager = require('./core/applicationManager');
+const wsServer = require('./services/websocket/wsServer');
+const { initializeDatabase } = require('./database/integration');
 
 async function initialize() {
-    // Create required directories
-    ['logs', 'backups', 'data', 'config'].forEach(dir => {
-        const dirPath = path.join(__dirname, '..', dir);
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath, { recursive: true });
-        }
-    });
-
-    // Validate bot token
-    const tokenPath = path.join(__dirname, '../bot_token.txt');
-    if (!fs.existsSync(tokenPath)) {
-        logger.error('bot_token.txt not found. Please create this file with your bot token.');
-        process.exit(1);
-    }
-
-    process.env.DISCORD_TOKEN = fs.readFileSync(tokenPath, 'utf8').trim();
-
     try {
-        await applicationManager.start();
+        // Ensure directories exist
+        ['logs', 'backups', 'data', 'config'].forEach(dir => {
+            const dirPath = path.join(__dirname, '..', dir);
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath, { recursive: true });
+            }
+        });
+
+        // Initialize database
+        await initializeDatabase();
+
+        // Initialize services
+        await serviceIntegrator.initializeServices();
+        
+        // Start dashboard
+        const dashboard = new Dashboard();
+        await dashboard.start(3000);
+        
+        // Start WebSocket server
+        wsServer.initialize(dashboard.server);
+        
+        // Start bot
         await bot.start();
         
-        logger.logEvent('Application initialized successfully');
+        logger.info('Application started successfully');
     } catch (error) {
-        logger.error('Failed to initialize application:', error);
+        logger.error('Failed to start application:', error);
         process.exit(1);
     }
 }
 
-// Handle errors
-process.on('uncaughtException', error => {
-    logger.error('Uncaught exception:', error);
-    applicationManager.getService('events')
-        .handleEvent('uncaughtException', { error });
-});
-
-process.on('unhandledRejection', error => {
-    logger.error('Unhandled rejection:', error);
-    applicationManager.getService('events')
-        .handleEvent('unhandledRejection', { error });
-});
-
-// Add graceful shutdown
-process.on('SIGTERM', async () => {
-    logger.logEvent('Received SIGTERM signal');
-    await applicationManager.stop();
+// Handle shutdown
+process.on('SIGINT', async () => {
+    logger.info('Shutting down...');
+    await serviceIntegrator.stop();
     process.exit(0);
 });
 

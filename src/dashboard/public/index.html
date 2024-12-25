@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PzBotz Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h2>PzBotz</h2>
+            <nav>
+                <a href="#overview">Overview</a>
+                <a href="#performance">Performance</a>
+                <a href="#players">Players</a>
+                <a href="#logs">Logs</a>
+            </nav>
+        </div>
+        
+        <main>
+            <div id="overview" class="panel">
+                <h2>System Overview</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card" id="cpu-usage"></div>
+                    <div class="metric-card" id="memory-usage"></div>
+                    <div class="metric-card" id="player-count"></div>
+                    <div class="metric-card" id="uptime"></div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

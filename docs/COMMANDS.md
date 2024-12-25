@@ -2,36 +2,44 @@
 
 ## Public Commands
 
-### Points & Shop
-```
-!points              - Check your points
-!shop                - View available items
-!buy <item>          - Purchase an item
-!wheelspin           - Try your luck
-```
+### Shop System
+- `!shop` - View shop items
+- `!buy <item>` - Purchase item
+- `!points` - Check balance
+
+### Wheel Spins
+- `!wheelspin` - Try your luck
+- `!rewards` - View possible rewards
 
 ### Server Info
-```
-!server_status       - Check server status
-!players             - List online players
-!stats               - View server statistics
-```
+- `!status` - Check server status
+- `!players` - List online players
+- `!uptime` - Server uptime
 
 ## Admin Commands
 
 ### Server Management
-```
-!restart             - Restart the server
-!backup              - Create backup
-!performance         - View metrics
-!config <option>     - Modify settings
+```bash
+# Server Control
+!server start     # Start server
+!server stop      # Stop server
+!server restart   # Restart server
+
+# Backup Management
+!backup create    # Create backup
+!backup list      # List backups
+!backup restore   # Restore backup
+
+# Configuration
+!config view      # View settings
+!config set       # Update setting
 ```
 
-### Moderation
-```
-!kick <player>       - Kick player
-!ban <player>        - Ban player
-!whitelist <player>  - Manage whitelist
+### Player Management
+```bash
+!player kick <name> [reason]   # Kick player
+!player ban <name> [reason]    # Ban player
+!player whitelist add/remove   # Manage whitelist
 ```
 
 ## Permission Levels

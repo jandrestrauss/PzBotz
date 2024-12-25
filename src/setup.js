@@ -65,6 +65,7 @@ RCON_HOST=${rconHost}
 RCON_PORT=${rconPort}
 RCON_PASSWORD=${rconPass}
 LOG_LEVEL=info
+BACKUP_PATH=/path/to/backups
 `;
             fs.writeFileSync(envPath, envContent.trim());
             logger.logEvent('Created .env file');
