@@ -64,4 +64,29 @@ class AppError extends Error {
     }
 }
 
-module.exports = { ErrorHandler, AppError };
+const errorHandler = (err, req, res, next) => {
+    console.error(err.stack);
+
+    if (err.type === 'ValidationError') {
+        return res.status(400).json({
+            error: 'Validation Error',
+            details: err.message
+        });
+    }
+
+    if (err.type === 'AuthenticationError') {
+        return res.status(401).json({
+            error: 'Authentication Error',
+            details: err.message
+        });
+    }
+
+    return res.status(500).json({
+        error: 'Internal Server Error',
+        message: process.env.NODE_ENV === 'production' 
+            ? 'An unexpected error occurred' 
+            : err.message
+    });
+};
+
+module.exports = { ErrorHandler, AppError, errorHandler };

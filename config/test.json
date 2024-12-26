@@ -1,0 +1,15 @@
+{
+    "discord": {
+        "token": "YOUR_TEST_BOT_TOKEN",
+        "clientId": "YOUR_TEST_CLIENT_ID",
+        "guildId": "YOUR_TEST_GUILD_ID"
+    },
+    "rcon": {
+        "host": "localhost",
+        "port": 25575,
+        "password": "test_password"
+    },
+    "database": {
+        "url": "mongodb://localhost:27017/test_db"
+    }
+}

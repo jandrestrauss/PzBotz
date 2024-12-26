@@ -2,9 +2,11 @@ const Rcon = require('rcon');
 const config = require('../config.json');
 
 class RconHandler {
-    constructor() {
-        this.rcon = null;
+    constructor(config) {
+        this.config = config;
         this.isConnected = false;
+        this.maxRetries = 3;
+        this.retryDelay = 1000; // 1 second
     }
 
     async connect() {
@@ -26,10 +28,28 @@ class RconHandler {
         }
     }
 
-    async sendCommand(command) {
-        if (!this.isConnected) {
-            await this.connect();
+    async sendCommand(command, retryCount = 0) {
+        try {
+            // Input validation
+            if (!command || typeof command !== 'string') {
+                throw new Error('Invalid command format');
+            }
+
+            // Ensure connection
+            if (!this.isConnected) {
+                await this.connect();
+            }
+
+            // Send command
+            const response = await this.rcon.send(command);
+            return response;
+
+        } catch (error) {
+            if (retryCount < this.maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+                return this.sendCommand(command, retryCount + 1);
+            }
+            throw new Error(`Failed to execute command after ${this.maxRetries} retries: ${error.message}`);
         }
-        return this.rcon.send(command);
     }
 }

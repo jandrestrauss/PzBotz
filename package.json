@@ -8,9 +8,9 @@
     "generate-index": "node index.js",
     "build": "electron-builder",
     "dev": "nodemon src/index.js",
-    "test": "mocha tests/**/*.test.js",
-    "test:watch": "mocha tests/**/*.test.js --watch",
-    "test:coverage": "nyc mocha tests/**/*.test.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/",
     "setup": "node src/setup.js"
   },
