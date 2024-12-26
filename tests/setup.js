@@ -1,4 +1,5 @@
 const logger = require('../src/utils/logger');
+const { jest } = require('@jest/globals');
 
 beforeAll(() => {
   // Setup test environment
@@ -16,3 +17,5 @@ global.mockLogger = {
   warn: jest.fn(),
   debug: jest.fn()
 };
+
+global.jest = jest;

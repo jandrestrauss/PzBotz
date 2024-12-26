@@ -1,29 +1,33 @@
-const fs = require('fs');
-const path = require('path');
+const { describe, test, expect, jest } = require('@jest/globals');
 const logger = require('../../utils/logger');
 
-jest.mock('fs');
-
 describe('Logger', () => {
-    const logFile = path.join(__dirname, '../../../logs/app.log');
+    const originalConsoleLog = console.log;
+    let consoleOutput = [];
 
     beforeEach(() => {
-        fs.appendFileSync.mockClear();
+        consoleOutput = [];
+        console.log = jest.fn((...args) => {
+            consoleOutput.push(args.join(' '));
+        });
     });
 
-    test('Should log events correctly', () => {
-        const event = 'Test event';
-        logger.logEvent(event);
-
-        expect(fs.appendFileSync).toHaveBeenCalledWith(logFile, expect.stringContaining(event));
+    afterEach(() => {
+        console.log = originalConsoleLog;
     });
 
-    test('Should log errors correctly', () => {
-        const message = 'Test error';
-        const error = new Error('Test error stack');
-        logger.error(message, error);
+    test('should log messages with correct format', () => {
+        const testMessage = 'Test log message';
+        logger.info(testMessage);
+        
+        expect(consoleOutput[0]).toMatch(/\[\d{4}-\d{2}-\d{2}.*\] INFO: Test log message/);
+    });
 
-        expect(fs.appendFileSync).toHaveBeenCalledWith(logFile, expect.stringContaining(message));
-        expect(fs.appendFileSync).toHaveBeenCalledWith(logFile, expect.stringContaining(error.stack));
+    test('should log errors with stack trace', () => {
+        const testError = new Error('Test error');
+        logger.error(testError);
+        
+        expect(consoleOutput[0]).toMatch(/\[\d{4}-\d{2}-\d{2}.*\] ERROR:/);
+        expect(consoleOutput[0]).toContain('Test error');
     });
 });

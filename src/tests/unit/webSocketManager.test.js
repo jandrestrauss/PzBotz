@@ -1,23 +1,30 @@
-const WebSocket = require('ws');
-const WebSocketManager = require('../../websocket/wsManager');
+const { describe, test, expect, beforeEach, jest } = require('@jest/globals');
+const WebSocketManager = require('../../services/webSocketManager');
 const logger = require('../../utils/logger');
 
 jest.mock('ws');
 jest.mock('../../utils/logger');
 
 describe('WebSocketManager', () => {
-    let server;
     let wsManager;
 
     beforeEach(() => {
-        server = { on: jest.fn() };
-        wsManager = new WebSocketManager(server);
+        wsManager = new WebSocketManager();
     });
 
-    test('Should handle new connections', () => {
-        const ws = { send: jest.fn(), on: jest.fn() };
-        wsManager.handleConnection(ws);
-        expect(ws.send).toHaveBeenCalledWith(JSON.stringify({ type: 'connection', status: 'connected' }));
+    test('should initialize correctly', () => {
+        expect(wsManager).toBeDefined();
+        expect(wsManager.connections).toEqual(new Set());
+    });
+
+    test('should handle new connections', () => {
+        const mockSocket = {
+            on: jest.fn(),
+            send: jest.fn()
+        };
+
+        wsManager.handleConnection(mockSocket);
+        expect(wsManager.connections.size).toBe(1);
     });
 
     test('Should handle disconnections', () => {

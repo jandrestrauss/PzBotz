@@ -1,29 +1,23 @@
-const { monitorAdvancedMetrics } = require('../../monitoring/monitor');
-const logger = require('../../utils/logger');
+const { describe, test, expect, beforeEach, jest } = require('@jest/globals');
+const Monitor = require('../../services/monitor');
 
-jest.mock('../../utils/logger');
-
-describe('Monitoring System', () => {
+describe('Monitor', () => {
+    let monitor;
+    
     beforeEach(() => {
-        jest.clearAllMocks();
+        monitor = new Monitor();
     });
 
-    test('Should monitor advanced metrics', async () => {
-        const getCPUUsage = jest.fn().mockResolvedValue(85);
-        const getMemoryUsage = jest.fn().mockResolvedValue(70);
-        const getDiskIO = jest.fn().mockResolvedValue(50);
-
-        await monitorAdvancedMetrics();
-        expect(getCPUUsage).toHaveBeenCalled();
-        expect(getMemoryUsage).toHaveBeenCalled();
-        expect(getDiskIO).toHaveBeenCalled();
-        expect(logger.warn).toHaveBeenCalledWith('High CPU usage detected');
+    test('should track system metrics', async () => {
+        const metrics = await monitor.getMetrics();
+        expect(metrics).toHaveProperty('memory');
+        expect(metrics).toHaveProperty('cpu');
+        expect(metrics).toHaveProperty('uptime');
     });
 
-    test('Should handle monitoring errors', async () => {
-        const getCPUUsage = jest.fn().mockRejectedValue(new Error('Test error'));
-
-        await expect(monitorAdvancedMetrics()).rejects.toThrow('Test error');
-        expect(logger.warn).not.toHaveBeenCalledWith('High CPU usage detected');
+    test('should handle error conditions', async () => {
+        monitor.getSystemMetrics = jest.fn().mockRejectedValue(new Error('Test error'));
+        
+        await expect(monitor.getMetrics()).rejects.toThrow('Test error');
     });
 });
