@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const readline = require('readline');
 const logger = require('./utils/logger');
@@ -13,23 +13,31 @@ class Setup {
     }
 
     async run() {
-        logger.logEvent('Starting setup...');
-        
-        await this.createDirectories();
-        await this.setupConfig();
-        await this.configureBot();
-        
-        this.rl.close();
-        logger.logEvent('Setup completed successfully');
+        try {
+            logger.info('Starting setup...');
+            
+            await this.createDirectories();
+            await this.setupConfig();
+            await this.configureBot();
+            
+            this.rl.close();
+            logger.info('Setup completed successfully');
+        } catch (error) {
+            logger.error('Setup failed', { error: error.message });
+            this.rl.close();
+            process.exit(1);
+        }
     }
 
     async createDirectories() {
         const dirs = ['logs', 'backups', 'data', 'config'];
         for (const dir of dirs) {
             const dirPath = path.join(__dirname, '..', dir);
-            if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
-                logger.logEvent(`Created directory: ${dir}`);
+            try {
+                await fs.ensureDir(dirPath);
+                logger.info(`Created directory: ${dir}`);
+            } catch (error) {
+                logger.error(`Error creating directory ${dir}:`, error.message);
             }
         }
     }
@@ -46,7 +54,7 @@ class Setup {
             const filePath = path.join(this.configPath, file);
             if (!fs.existsSync(filePath)) {
                 fs.writeFileSync(filePath, JSON.stringify(defaultContent, null, 2));
-                logger.logEvent(`Created config file: ${file}`);
+                logger.info(`Created config file: ${file}`);
             }
         }
     }
@@ -68,7 +76,7 @@ LOG_LEVEL=info
 BACKUP_PATH=/path/to/backups
 `;
             fs.writeFileSync(envPath, envContent.trim());
-            logger.logEvent('Created .env file');
+            logger.info('Created .env file');
         }
     }
 
@@ -82,7 +90,7 @@ BACKUP_PATH=/path/to/backups
 // Run setup if called directly
 if (require.main === module) {
     new Setup().run().catch(error => {
-        logger.error('Setup failed:', error);
+        logger.error('Fatal setup error', { error: error.message });
         process.exit(1);
     });
 }
