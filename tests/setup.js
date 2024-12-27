@@ -1,21 +1,15 @@
 const logger = require('../src/utils/logger');
-const { jest } = require('@jest/globals');
 
 beforeAll(() => {
-  // Setup test environment
   process.env.NODE_ENV = 'test';
+  // Reset mock state before each test
+  jest.clearAllMocks();
 });
 
-afterAll(() => {
-  // Cleanup test environment
-});
-
-// Global test utilities
+// Global test utilities using globally available jest
 global.mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn()
 };
-
-global.jest = jest;
