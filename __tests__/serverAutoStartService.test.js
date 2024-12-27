@@ -1,4 +1,4 @@
-const serverAutoStartService = require('../serverAutoStartService');
+const serverAutoStartService = require('../serverAutoStartService.js');
 
 describe('Server Auto Start Service', () => {
   test('should check if server is running', async () => {

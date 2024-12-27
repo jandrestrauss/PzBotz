@@ -1,4 +1,4 @@
-const webSocketServer = require('../webSocketServer');
+const webSocketServer = require('../src/webSocketServer');
 
 describe('WebSocket Server', () => {
   test('should handle client connections', () => {

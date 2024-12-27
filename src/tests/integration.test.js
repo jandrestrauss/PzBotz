@@ -1,6 +1,6 @@
-const request = require('supertest');
-const app = require('../app');
-const { AppError } = require('../utils/errorHandler');
+import request from 'supertest';
+import app from '../App'; // Ensure consistent casing
+import { AppError } from '../utils/errorHandler'; // Ensure the correct export
 
 describe('API Integration Tests', () => {
     test('GET /api/status should return server status', async () => {

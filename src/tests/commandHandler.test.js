@@ -1,3 +1,5 @@
+const commandHandler = require('../../commands/commandHandler'); // Adjust the path as necessary
+
 describe('Command Handler Tests', () => {
     // Valid Commands Tests
     describe('Valid Commands', () => {
@@ -27,6 +29,9 @@ describe('Command Handler Tests', () => {
 
     // Permission Tests
     describe('Permission Handling', () => {
+        const userContext = { role: 'user' };
+        const moderatorContext = { role: 'moderator' };
+
         test('should enforce admin permissions', async () => {
             const result = await commandHandler.execute('!admin', userContext);
             expect(result.permitted).toBeFalsy();

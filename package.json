@@ -25,6 +25,7 @@
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "axios": "^1.6.5",
+    "chai": "^4.3.6",
     "chart.js": "^4.4.1",
     "chartjs-node-canvas": "^4.1.6",
     "discord.js": "^14.14.1",
@@ -40,19 +41,18 @@
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
     "pg": "^8.11.3",
+    "prom-client": "^14.0.0",
+    "rate-limit-redis": "^4.2.0",
     "rate-limiter-flexible": "^5.0.0",
     "rcon-client": "^4.2.5",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "redis": "^4.6.12",
+    "supertest": "^6.1.6",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",
-    "ws": "^8.16.0",
-    "chai": "^4.3.6",
-    "supertest": "^6.1.6",
-    "prom-client": "^14.0.0",
-    "rate-limit-redis": "^1.7.0"
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
@@ -63,6 +63,8 @@
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
     "@types/node-schedule": "^2.1.5",
+    "@types/pg": "^8.11.10",
+    "@types/supertest": "^2.0.16",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
@@ -79,6 +81,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
     "moduleFileExtensions": [
       "ts",
       "tsx",
@@ -89,31 +94,31 @@
     ],
     "roots": [
       "<rootDir>/src",
-      "<rootDir>/tests/integration"
+      "<rootDir>/tests"
     ],
     "testMatch": [
       "**/__tests__/**/*.ts?(x)",
-      "**/?(*.)+(spec|test).ts?(x)",
-      "**/?(*.)+(spec|test).js?(x)"
+      "**/?(*.)+(spec|test).ts?(x)"
     ],
     "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.jsx?$": "babel-jest"
-    ],
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
+    },
     "transformIgnorePatterns": [
-      "/node_modules/(?!chai)"
-    ],
-    "coverageDirectory": "./coverage",
-    "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}",
-      "!src/**/*.d.ts"
-    ],
-    "testTimeout": 10000
+      "/node_modules/(?!discord\\.js)"
+    ]
   },
   "babel": {
     "presets": [
       "@babel/preset-env",
       "@babel/preset-react"
     ]
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

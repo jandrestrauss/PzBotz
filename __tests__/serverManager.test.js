@@ -1,4 +1,4 @@
-const serverManager = require('../serverManager');
+const serverManager = require('../src/serverManager');
 
 describe('Server Manager', () => {
   test('should execute RCON command', async () => {
