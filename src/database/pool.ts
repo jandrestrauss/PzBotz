@@ -42,8 +42,18 @@ export class DatabasePool {
 export const pool = new DatabasePool();
 
 export class DatabasePoolMock {
-    query(sql: string) {
-        // Mock query implementation
+    private queryCount: number = 0;
+    private errorRate: number = 0;
+
+    async query(sql: string) {
+        this.queryCount++;
         return Promise.resolve();
+    }
+
+    getMetrics() {
+        return {
+            queryCount: this.queryCount,
+            errorRate: this.errorRate
+        };
     }
 }

@@ -50,7 +50,13 @@ export const metrics = {
     getMetrics() {
         return {
             queryCount: this.queryCount,
-            errorRate: this.errorRate,
+            errorRate: this.errorRate
         };
+    },
+    recordQuery(duration: number, success: boolean) {
+        this.queryCount++;
+        if (!success) {
+            this.errorRate++;
+        }
     }
 };

@@ -6,7 +6,7 @@ export class BackupManager {
     private backupPath: string;
 
     constructor(backupPath: string) {
-        if (!backupPath) {
+        if (backupPath === '') {
             throw new Error('Backup path must be provided');
         }
         this.backupPath = backupPath;
@@ -14,9 +14,14 @@ export class BackupManager {
 
     async createBackup(): Promise<string> {
         const backupFile = path.join(this.backupPath, `backup-${Date.now()}.zip`);
-        await fs.writeFile(backupFile, 'backup data');
-        logger.logEvent('Backup created');
-        return backupFile;
+        try {
+            await fs.writeFile(backupFile, 'backup data');
+            logger.logEvent('Backup created');
+            return backupFile;
+        } catch (error) {
+            logger.error(`Backup creation failed: ${(error as Error).message}, Path: ${backupFile}`);
+            throw error;
+        }
     }
 
     async restoreBackup(backupFile: string): Promise<void> {
@@ -26,7 +31,13 @@ export class BackupManager {
     }
 
     async deleteBackup(backupFile: string): Promise<void> {
-        await fs.unlink(path.join(this.backupPath, backupFile));
-        logger.logEvent('Backup deleted');
+        const filePath = path.join(this.backupPath, backupFile);
+        try {
+            await fs.unlink(filePath);
+            logger.logEvent(`Backup deleted: ${filePath}`);
+        } catch (error) {
+            logger.logEvent(`Backup deletion failed: ${(error as Error).message}`);
+            throw error;
+        }
     }
 }

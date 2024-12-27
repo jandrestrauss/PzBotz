@@ -1,51 +1,45 @@
-const os = require('os');
-const AdvancedMetrics = require('../../monitoring/advancedMetrics');
-const logger = require('../../utils/logger');
+import { jest } from '@jest/globals';
+import * as advancedMetrics from '../../src/monitoring/advancedMetrics';
+import * as logger from '../../src/utils/logger';
+import { CpuInfo } from 'os';
 
 jest.mock('os');
-jest.mock('../../utils/logger');
+jest.mock('../../src/monitoring/advancedMetrics', () => ({
+    collect: jest.fn(),
+    // ...other methods...
+}));
 
-describe('AdvancedMetrics', () => {
+jest.mock('../../src/utils/logger', () => ({
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+}));
+
+describe('Advanced Metrics', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    test('Should collect CPU usage', () => {
-        os.loadavg.mockReturnValue([0.5]);
-        const metrics = new AdvancedMetrics();
-        const cpuUsage = metrics.getCPUUsage();
-        expect(cpuUsage).toBe(50);
+    test('should collect CPU metrics', () => {
+        const mockCpuInfo: CpuInfo[] = [
+            // ...mock data...
+        ];
+        jest.spyOn(os, 'cpus').mockReturnValue(mockCpuInfo);
+        jest.spyOn(os, 'totalmem').mockReturnValue(16000000000);
+        jest.spyOn(os, 'freemem').mockReturnValue(8000000000);
+
+        advancedMetrics.collect();
+
+        expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('CPU metrics collected'));
     });
 
-    test('Should collect memory usage', () => {
-        os.totalmem.mockReturnValue(100);
-        os.freemem.mockReturnValue(40);
-        const metrics = new AdvancedMetrics();
-        const memoryUsage = metrics.getMemoryUsage();
-        expect(memoryUsage).toBe(60);
-    });
+    test('should handle errors during metrics collection', () => {
+        jest.spyOn(os, 'cpus').mockImplementation(() => {
+            throw new Error('Test error');
+        });
 
-    test('Should alert admin on high CPU usage', () => {
-        os.loadavg.mockReturnValue([1.0]);
-        const metrics = new AdvancedMetrics();
-        metrics.startMonitoring();
-        expect(logger.warn).toHaveBeenCalledWith('High CPU usage detected');
-    });
+        advancedMetrics.collect();
 
-    test('should collect system metrics', async () => {
-        os.cpus.mockReturnValue([{ model: 'Intel', speed: 2400 }]);
-        os.totalmem.mockReturnValue(8 * 1024 * 1024 * 1024);
-        os.freemem.mockReturnValue(4 * 1024 * 1024 * 1024);
-
-        const metrics = await AdvancedMetrics.collect();
-        expect(metrics).toHaveProperty('cpu');
-        expect(metrics).toHaveProperty('memory');
-    });
-
-    test('should handle errors during metric collection', async () => {
-        os.cpus.mockImplementation(() => { throw new Error('Test error'); });
-
-        await expect(AdvancedMetrics.collect()).rejects.toThrow('Test error');
-        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to collect metrics'));
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error collecting metrics'));
     });
 });

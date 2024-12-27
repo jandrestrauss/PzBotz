@@ -16,7 +16,7 @@ describe('Discord Bot Integration Tests', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        metrics.reset();
+        metrics.resetAll();
         (logger.error as jest.Mock) = jest.fn();
         (logger.info as jest.Mock) = jest.fn();
         
@@ -47,7 +47,7 @@ describe('Discord Bot Integration Tests', () => {
 
     test('should log database interactions', async () => {
         // Reset metrics before test
-        metrics.reset();
+        metrics.resetAll();
 
         // Setup mock query timing
         const startTime = Date.now();
