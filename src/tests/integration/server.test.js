@@ -3,7 +3,7 @@ const app = require('../../App');
 const ZomboidServer = require('../../zomboid/server');
 const { generateToken } = require('../../auth/authHandler');
 
-describe('Server Management API', () => {
+describe('API Integration Tests', () => {
     let authToken;
 
     beforeAll(async () => {

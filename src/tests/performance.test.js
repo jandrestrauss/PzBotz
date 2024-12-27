@@ -2,7 +2,9 @@ const { expect } = require('chai');
 const { performance } = require('perf_hooks');
 const gameEconomy = require('../integration/gameEconomy');
 const serverStats = require('../models/serverStats');
+const { readGameData } = require('../utils/gameFiles');
 const database = require('../database');
+const logger = require('../utils/logger');
 
 describe('Performance Tests', () => {
     before(async () => {
@@ -29,5 +31,23 @@ describe('Performance Tests', () => {
         await serverStats.getOverviewStats();
         const endTime = performance.now();
         expect(endTime - startTime).to.be.below(100); // Should complete within 100ms
+    });
+
+    it('should measure game economy performance', async () => {
+        const start = performance.now();
+        await gameEconomy.updateEconomy();
+        const end = performance.now();
+        const duration = end - start;
+
+        expect(duration).toBeLessThan(1000); // Example threshold
+    });
+
+    it('should measure server stats performance', async () => {
+        const start = performance.now();
+        await serverStats.updateStats();
+        const end = performance.now();
+        const duration = end - start;
+
+        expect(duration).toBeLessThan(1000); // Example threshold
     });
 });

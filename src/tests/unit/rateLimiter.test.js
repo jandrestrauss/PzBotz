@@ -1,4 +1,11 @@
+const rateLimit = require('express-rate-limit');
+const RedisStore = require('rate-limit-redis');
+const redis = require('redis');
 const { rateLimitMiddleware } = require('../../security/rateLimiter');
+
+const redisClient = redis.createClient({
+  // ...existing code...
+});
 
 describe('Rate Limiter Middleware', () => {
     let req, res, next;

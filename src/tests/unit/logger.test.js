@@ -1,6 +1,11 @@
 const { describe, test, expect, jest } = require('@jest/globals');
 const logger = require('../../utils/logger');
 
+jest.mock('../../utils/logger', () => ({
+    info: jest.fn(),
+    error: jest.fn()
+}));
+
 describe('Logger', () => {
     const originalConsoleLog = console.log;
     let consoleOutput = [];

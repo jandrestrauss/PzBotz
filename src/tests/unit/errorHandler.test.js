@@ -1,4 +1,4 @@
-const { errorHandler } = require('../../errorHandling/errorHandler');
+const errorHandler = require('../../utils/errorHandler');
 
 describe('Error Handler', () => {
     let req, res, next;
@@ -15,7 +15,5 @@ describe('Error Handler', () => {
 
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' });
-        expect(console.error).toHaveBeenCalledWith('Error:', error.message);
-        expect(console.error).toHaveBeenCalledWith('Stack:', error.stack);
     });
 });

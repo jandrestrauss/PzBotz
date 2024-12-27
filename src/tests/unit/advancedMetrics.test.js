@@ -31,4 +31,21 @@ describe('AdvancedMetrics', () => {
         metrics.startMonitoring();
         expect(logger.warn).toHaveBeenCalledWith('High CPU usage detected');
     });
+
+    test('should collect system metrics', async () => {
+        os.cpus.mockReturnValue([{ model: 'Intel', speed: 2400 }]);
+        os.totalmem.mockReturnValue(8 * 1024 * 1024 * 1024);
+        os.freemem.mockReturnValue(4 * 1024 * 1024 * 1024);
+
+        const metrics = await AdvancedMetrics.collect();
+        expect(metrics).toHaveProperty('cpu');
+        expect(metrics).toHaveProperty('memory');
+    });
+
+    test('should handle errors during metric collection', async () => {
+        os.cpus.mockImplementation(() => { throw new Error('Test error'); });
+
+        await expect(AdvancedMetrics.collect()).rejects.toThrow('Test error');
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to collect metrics'));
+    });
 });
